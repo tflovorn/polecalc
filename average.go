@@ -21,7 +21,8 @@ func (accum *Accumulator) average() float64 {
 
 func BuildAccumulator() *Accumulator {
     accum := new(Accumulator)
-    accum.value = 0
+    accum.value = 0     // not really necessary - int initializes to 0
+    accum.points = 0
     accum.newValues = make(chan float64)
     go accum.listen()
     return accum
