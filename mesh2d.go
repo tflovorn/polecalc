@@ -2,13 +2,14 @@ package mesh2d
 
 import "math"
 
-func Square(pointsPerSide uint32) chan []float64 {
+func Square(pointsPerSide uint32) (chan []float64, chan bool) {
     cmesh := make(chan []float64)
-    go helpSquare(cmesh, pointsPerSide)
-    return cmesh
+    done := make(chan bool)
+    go helpSquare(cmesh, done, pointsPerSide)
+    return cmesh, done
 }
 
-func helpSquare(cmesh chan []float64, pointsPerSide uint32) {
+func helpSquare(cmesh chan []float64, done chan bool, pointsPerSide uint32) {
     var x, y, step, length float64
     length = 2 * math.Pi
     step = length / float64(pointsPerSide)
@@ -20,5 +21,8 @@ func helpSquare(cmesh chan []float64, pointsPerSide uint32) {
         }
         y += step
         x = -math.Pi
+    }
+    for {
+        done <- true;
     }
 }

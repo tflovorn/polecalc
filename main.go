@@ -1,11 +1,17 @@
 package main
 
 import "fmt"
-import "./mesh2d"
+import "math"
+import "./average"
+
+func worker(cmesh chan []float64, accum chan float64) {
+    for {
+        k := <-cmesh
+        kx, ky := k[0], k[1]
+        accum <- math.Sin(kx) * math.Sin(ky)
+    }
+}
 
 func main() {
-    cmesh := mesh2d.Square(16)
-    for i := 0; i < 33; i++ {
-        fmt.Println(<-cmesh)
-    }
+    fmt.Println(average.Average(128, worker, 8))
 }
