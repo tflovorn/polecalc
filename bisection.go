@@ -1,5 +1,8 @@
 package goroots
 
+import "fmt"
+import "math"
+
 type RootError struct {
 	Reason string
 }
@@ -19,6 +22,14 @@ func SolveBisection(f Func1D, left, right, epsilon float64) (float64, *RootError
 	if left > right {
 		left, right = right, left
 	}
+	var error *RootError
+	for math.Fabs(right - left) > 2*epsilon {
+		left, right, error = BisectionIterate(f, left, right)
+		if error != nil {
+			return (left + right) / 2.0, error
+		}
+	}
+	return (left + right) / 2.0, nil
 }
 
 func BisectionIterate(f Func1D, left, right float64) (float64, float64, *RootError) {
@@ -26,7 +37,7 @@ func BisectionIterate(f Func1D, left, right float64) (float64, float64, *RootErr
 		return left, right, NewRootError("arguments do not bracket a root")
 	}
 	midpoint := (left + right) / 2.0
-	fl, fm, fr = f(left), f(midpoint), f(right)
+	fl, fm, fr := f(left), f(midpoint), f(right)
 	if fl == 0 {
 		return left, left, nil
 	} else if fr == 0 {
@@ -37,7 +48,7 @@ func BisectionIterate(f Func1D, left, right float64) (float64, float64, *RootErr
 	} else if (fm > 0 && fr < 0) || (fm < 0 && fr > 0) {
 		// root is in the right half
 		return midpoint, right, nil
-	} else {
-		return midpoint, midpoint, nil
 	}
+	// midpoint must be the root
+	return midpoint, midpoint, nil
 }
