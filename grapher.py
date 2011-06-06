@@ -1,3 +1,4 @@
+import sys
 import json
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
@@ -78,3 +79,7 @@ def _save_figure(graph_data, fig):
         return
     fig.savefig(graph_data["graph_filepath"] + ".png")
     fig.savefig(graph_data["graph_filepath"] + ".eps")
+
+if __name__ == "__main__":
+    if len(sys.argv) > 1:
+        make_graph(parse_file(sys.argv[1]))
