@@ -2,7 +2,7 @@ package goroots
 
 import "math"
 import "testing"
-//import "testing/quick" // want to use Check; unsure if it'll work with current SolveBisection for small epsilon
+import "testing/quick"
 
 // Does SolveBisection correctly solve a simple linear function?
 func TestLinear(t *testing.T) {
@@ -23,7 +23,7 @@ func TestLinear(t *testing.T) {
 	}
 }
 
-// Does BisectionFullPrecision correctly solve a simple linear function?
+// Does BisectionFullPrecision correctly solve arbitrary simple linear functions?
 func TestLinearFullPrecision(t *testing.T) {
 	macheps := math.Pow(2.0, -53.0)
 	makeLinear := func(root float64) func(float64) float64 {
@@ -37,7 +37,7 @@ func TestLinearFullPrecision(t *testing.T) {
 		}
 		return val - root <= macheps
 	}
-	if !(checker(5) && checker(100) && checker(1e-5)) {
-		t.FailNow()
+	if err := quick.Check(checker, nil); err != nil {
+		t.Error(err)
 	}
 }
