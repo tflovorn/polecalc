@@ -81,7 +81,6 @@ func MakePlot(graphData interface{}, jsonFilePath string) os.Error {
 		return err
 	}
 	wd, _ := os.Getwd()
-	fmt.Println(wd)
 	cmd, err := exec.Run("/usr/bin/env", []string{"/usr/bin/env", "python", wd + "/grapher.py", jsonFilePath}, os.Environ(), wd, exec.DevNull, exec.PassThrough, exec.PassThrough)
 	if err != nil {
 		return err
