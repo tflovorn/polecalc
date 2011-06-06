@@ -3,6 +3,8 @@ package mpljson
 import (
 	"json"
 	"os"
+	"fmt"
+	"exec"
 )
 
 const SERIES_KEY = "series"
@@ -19,7 +21,6 @@ type Graph struct {
 }
 
 func NewGraph() *Graph {
-	// want to do any initialization?
 	graph := new(Graph)
 	graph.graphParameters = make(map[string]string)
 	graph.seriesParameters = make([]map[string]string, 0)
@@ -63,7 +64,7 @@ func (graph *Graph) MarshalJSON() ([]byte, os.Error) {
 
 // Constructs a plot from graph_data using matplotlib.
 // graph_data must be a list or dictionary containing objects representable
-// in JSON.
+// in JSON.  Blocks until Python script is finished.
 func MakePlot(graphData interface{}, jsonFilePath string) os.Error {
 	marshalled, err := json.Marshal(graphData)
 	if err != nil {
@@ -73,22 +74,23 @@ func MakePlot(graphData interface{}, jsonFilePath string) os.Error {
 	if err != nil {
 		return err
 	}
-	_, err = jsonFile.Write(marshalled)
+	if _, err := jsonFile.Write(marshalled); err != nil {
+		return err
+	}
+	if err := jsonFile.Close(); err != nil {
+		return err
+	}
+	wd, _ := os.Getwd()
+	fmt.Println(wd)
+	cmd, err := exec.Run("/usr/bin/env", []string{"/usr/bin/env", "python", wd + "/grapher.py", jsonFilePath}, os.Environ(), wd, exec.DevNull, exec.PassThrough, exec.PassThrough)
 	if err != nil {
 		return err
 	}
-	attr := new(os.ProcAttr)
-	attr.Dir, _ = os.Getwd()
-	proc, err := os.StartProcess("/usr/bin/env", []string{"python", "grapher.py", jsonFilePath}, attr)
-	if err != nil {
+	// Wait(0) -> wait for cmd to finish
+	if _, err := cmd.Wait(0); err != nil {
 		return err
 	}
-	_, err = proc.Wait(os.WSTOPPED)
-	if err != nil {
-		return err
-	}
-	err = proc.Release()
-	if err != nil {
+	if err := cmd.Close(); err != nil {
 		return err
 	}
 	return nil

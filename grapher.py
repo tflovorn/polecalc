@@ -80,6 +80,9 @@ def _save_figure(graph_data, fig):
     fig.savefig(graph_data["graph_filepath"] + ".png")
     fig.savefig(graph_data["graph_filepath"] + ".eps")
 
+print("in python script")
 if __name__ == "__main__":
+    print("in python main")
     if len(sys.argv) > 1:
+        print("about to make graph")
         make_graph(parse_file(sys.argv[1]))
