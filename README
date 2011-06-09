@@ -1,0 +1,23 @@
+Find the poles of the Green's function G_{c0} for the physical electron
+
+G_{c0}(k\omega) = \frac{1}{4N} \sum_{q} \left[ 
+\left(1+\frac{\lambda}{\omega_q}\right) \left(1+\frac{\xi_h(q-k)}{E_h(q-k)}\right) \frac{n_q + f(E_h(q-k))}{i\omega - \omega_q + E_h(q-k)} 
++ \left(1+\frac{\lambda}{\omega_q}\right) \left(1-\frac{\xi_h(q-k)}{E_h(q-k)}\right) \frac{n_q + 1 - f(E_h(q-k))}{i\omega - \omega_q - E_h(q-k)}
+- \left(1-\frac{\lambda}{\omega_q}\right) \left(1+\frac{\xi_h(q-k)}{E_h(q-k)}\right) \frac{n_q + 1 - f(E_h(q-k))}{i\omega + \omega_q + E_h(q-k)}
+- \left(1-\frac{\lambda}{\omega_q}\right) \left(1-\frac{\xi_h(q-k)}{E_h(q-k)}\right) \frac{n_q + f(E_h(q-k))}{i\omega + \omega_q - E_h(q-k)} \right]
+
+lambda is the boson chemical potential - treat as a free parameter (scaled with t0?)
+
+at zero temperature, need to fix D1, mu, and F0 by self-consistent equations used before
+
+at higher temperatures, beta is a free parameter; fix beta_c by looking at point where F0 = 0
+
+-------
+
+self-consistent equation:
+-interface function "absError(val float64, env Environment) float64" gives lhs - rhs of equation (not abs(lhs - rhs) to avoid singularity in derivative)
+-"solve(env Environment) Environment" finds the root of absError by building a closure around absError with env and passing the closure to a root-finder.  returned Environment has the appropriate variable set to the root of absError.
+
+self-consistent system:
+-interface function "solve(env Environment) Environment" solves all associated self-consistent equations iteratively. returns Environment after system has been solved.
+-implementing type holds a slice of self-consistent equations.  those with lowest indexes are highest priority to solve.  start with eq[0]. then do eq[1] followed by eq[0], iterating until both are solved.  continue to eq[2]->1->0, etc.
