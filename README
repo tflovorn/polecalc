@@ -21,7 +21,3 @@ self-consistent equation:
 self-consistent system:
 -interface function "solve(env Environment) Environment" solves all associated self-consistent equations iteratively. returns Environment after system has been solved.
 -implementing type holds a slice of self-consistent equations.  those with lowest indexes are highest priority to solve.  start with eq[0]. then do eq[1] followed by eq[0], iterating until both are solved.  continue to eq[2]->1->0, etc.
-
--------
-
-in order for subpackages to address one another, package polecalc is installed into $GOROOT (so go dir must be writeable)

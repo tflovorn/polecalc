@@ -1,4 +1,4 @@
-package mesh
+package polecalc
 
 type Accumulator struct {
     value float64

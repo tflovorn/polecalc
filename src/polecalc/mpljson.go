@@ -1,4 +1,4 @@
-package mpljson
+package polecalc
 
 import (
 	"json"
