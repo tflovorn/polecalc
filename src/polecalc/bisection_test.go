@@ -1,4 +1,4 @@
-package roots
+package polecalc
 
 import "math"
 import "testing"
