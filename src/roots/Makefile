@@ -1,6 +1,6 @@
 include $(GOROOT)/src/Make.inc
 
-TARG=goroots
+TARG=polecalc/roots
 GOFILES=\
 bisection.go\
 

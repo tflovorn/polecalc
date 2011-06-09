@@ -1,4 +1,4 @@
-package goroots
+package roots
 
 import "math"
 

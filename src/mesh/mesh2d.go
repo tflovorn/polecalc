@@ -1,4 +1,4 @@
-package mesh2d
+package mesh
 
 import "math"
 

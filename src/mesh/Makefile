@@ -1,6 +1,6 @@
 include $(GOROOT)/src/Make.inc
 
-TARG=mesh2d
+TARG=polecalc/mesh
 GOFILES=\
 mesh2d.go\
 average.go\

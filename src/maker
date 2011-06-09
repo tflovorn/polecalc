@@ -1,0 +1,8 @@
+#!/bin/sh
+
+for dir in "roots" "mesh" "mpljson"
+do
+    cd $dir
+    make install
+    cd ..
+done

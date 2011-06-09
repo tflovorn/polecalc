@@ -1,4 +1,4 @@
-package mesh2d
+package mesh
 
 type Accumulator struct {
     value float64

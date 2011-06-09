@@ -1,6 +1,6 @@
 include $(GOROOT)/src/Make.inc
 
-TARG=mpljson
+TARG=polecalc/mpljson
 GOFILES=\
 mpljson.go\
 
