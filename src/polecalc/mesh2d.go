@@ -17,14 +17,16 @@ func Square(pointsPerSide uint32) (chan []float64, chan bool) {
 func helpSquare(cmesh chan []float64, done chan bool, pointsPerSide uint32) {
 	length := 2 * math.Pi
 	step := length / float64(pointsPerSide)
-	x, y := -math.Pi, -math.Pi
-	for y < math.Pi {
-		for x < math.Pi {
+	begin := -math.Pi
+	end := math.Pi - step
+	x, y := begin, begin
+	for y <= end {
+		for x <= end {
 			cmesh <- []float64{x, y}
 			x += step
 		}
 		y += step
-		x = -math.Pi
+		x = begin
 	}
 	for {
 		done <- true
