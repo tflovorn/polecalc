@@ -28,7 +28,7 @@ type Environment struct {
 }
 
 // Construct an Environment from the JSON file with given path
-func EnvironmentFromFile(filePath string) *Environment, os.Error {
+func EnvironmentFromFile(filePath string) (*Environment, os.Error) {
 	fileContents, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return nil, err
@@ -38,9 +38,10 @@ func EnvironmentFromFile(filePath string) *Environment, os.Error {
 }
 
 // Construct an Environment from the given JSON string
-func EnvironmentFromString(jsonString string) *Environment, os.Error {
+func EnvironmentFromString(jsonString string) (*Environment, os.Error) {
 	// is there a way to implement this without manually specifying parameter names?
 	// maybe use reflect package?
+	return nil, nil
 }
 
 // Write the Environment to a JSON file at the given path

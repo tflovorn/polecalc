@@ -10,7 +10,7 @@ func WriteToJSONFile(object interface{}, filePath string) os.Error {
 	if err != nil {
 		return err
 	}
-	jsonFile, err := os.Create(jsonFilePath)
+	jsonFile, err := os.Create(filePath)
 	if err != nil {
 		return err
 	}
