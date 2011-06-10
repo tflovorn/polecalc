@@ -14,9 +14,9 @@ type jsonObject map[string]interface{}
 
 // Intermediate representation for graph data.
 type Graph struct {
-	graphParameters map[string]string
+	graphParameters  map[string]string
 	seriesParameters []map[string]string
-	seriesData [][][]float64
+	seriesData       [][][]float64
 }
 
 func NewGraph() *Graph {
@@ -42,15 +42,15 @@ func (graph *Graph) AddSeries(params map[string]string, data [][]float64) {
 
 // Implements interface json.Marshaler
 func (graph *Graph) MarshalJSON() ([]byte, os.Error) {
-	jsonGraph := jsonObject {}
+	jsonGraph := jsonObject{}
 	// add global graph parameters
 	for key, value := range graph.graphParameters {
 		jsonGraph[key] = value
 	}
 	// add parameters and data for each series
-	jsonGraph[SERIES_KEY] = []jsonObject {}
+	jsonGraph[SERIES_KEY] = []jsonObject{}
 	for i, someSeriesParams := range graph.seriesParameters {
-		newSeriesParams := jsonObject {}
+		newSeriesParams := jsonObject{}
 		for key, value := range someSeriesParams {
 			newSeriesParams[key] = value
 		}

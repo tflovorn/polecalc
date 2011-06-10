@@ -2,10 +2,10 @@ package polecalc
 
 // Collects values passed on the newValues channel to find an average
 type Accumulator struct {
-	value float64		// sum of points seen so far
-	compensate float64	// used in Kahan summation to correct floating-point error
-	points uint64		// number of points seen
-	newValues chan float64	// channel for new values to be summed
+	value      float64      // sum of points seen so far
+	compensate float64      // used in Kahan summation to correct floating-point error
+	points     uint64       // number of points seen
+	newValues  chan float64 // channel for new values to be summed
 }
 
 // Handle data when it shows up on newValues.

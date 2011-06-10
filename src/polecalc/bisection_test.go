@@ -14,7 +14,7 @@ func TestLinear(t *testing.T) {
 	checker := func(root float64) bool {
 		scale := math.Fabs(root)
 		epsilon := scale / 1e-5
-		val, err := SolveBisection(makeLinear(root), root - scale, root + scale, epsilon)
+		val, err := SolveBisection(makeLinear(root), root-scale, root+scale, epsilon)
 		if err != nil {
 			return false
 		}
@@ -32,11 +32,11 @@ func TestLinearFullPrecision(t *testing.T) {
 	}
 	checker := func(root float64) bool {
 		scale := math.Fabs(root)
-		val, err := BisectionFullPrecision(makeLinear(root), root - scale, root + scale)
+		val, err := BisectionFullPrecision(makeLinear(root), root-scale, root+scale)
 		if err != nil {
 			return false
 		}
-		return val - root <= MachEpsFloat64()
+		return val-root <= MachEpsFloat64()
 	}
 	if err := quick.Check(checker, nil); err != nil {
 		t.Error(err)

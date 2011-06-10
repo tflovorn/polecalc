@@ -20,7 +20,7 @@ func SolveBisection(f Func1D, left, right, epsilon float64) (float64, *RootError
 		left, right = right, left
 	}
 	var error *RootError
-	for math.Fabs(right - left) > 2*epsilon {
+	for math.Fabs(right-left) > 2*epsilon {
 		left, right, error = BisectionIterate(f, left, right)
 		if error != nil {
 			return (left + right) / 2.0, error
@@ -31,7 +31,7 @@ func SolveBisection(f Func1D, left, right, epsilon float64) (float64, *RootError
 
 // Provide the next iteration of the bisection method for f on the interval (left, right)
 func BisectionIterate(f Func1D, left, right float64) (float64, float64, *RootError) {
-	if f(left) * f(right) > 0 {
+	if f(left)*f(right) > 0 {
 		return left, right, &RootError{"arguments do not bracket a root"}
 	}
 	midpoint := (left + right) / 2.0
@@ -67,14 +67,14 @@ func BisectionFullPrecision(f Func1D, a, b float64) (float64, *RootError) {
 	} else {
 		lo, hi = b, a
 	}
-	mid := lo + (hi - lo) / 2.0
+	mid := lo + (hi-lo)/2.0
 	for mid != lo && mid != hi {
 		if f(mid) <= 0 {
 			lo = mid
 		} else {
 			hi = mid
 		}
-		mid = lo + (hi - lo) / 2.0
+		mid = lo + (hi-lo)/2.0
 	}
 	return mid, nil
 }
