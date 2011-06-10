@@ -34,7 +34,7 @@ func BuildAccumulator() *Accumulator {
 }
 
 // A function which does calculations based on data passed in on cmesh and returns results through accum
-type Consumer func(cmesh chan []float64, accum chan float64)
+type Consumer func(point []float64) float64
 
 // Find the average over a square grid of the function given by worker.
 // Spawn number of goroutines given by numWorkers.
@@ -45,7 +45,12 @@ func Average(pointsPerSide uint32, worker Consumer, numWorkers uint16) float64 {
 	accum := BuildAccumulator()
 	var i uint16 = 0
 	for i = 0; i < numWorkers; i++ {
-		go worker(cmesh, accum.newValues)
+		go func() {
+			for {
+				point := <-cmesh
+				accum.newValues <- worker(point)
+			}
+		}()
 	}
 	<-done
 	return accum.average()

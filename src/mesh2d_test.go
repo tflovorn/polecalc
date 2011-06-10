@@ -18,7 +18,7 @@ func TestSquareBounds(t *testing.T) {
 			if x > math.Pi || x < -math.Pi {
 				t.Fatalf("x out of bounds (x=%f, y=%f)", x, y)
 			}
-			if  y > math.Pi || y < -math.Pi {
+			if y > math.Pi || y < -math.Pi {
 				t.Fatalf("y out of bounds (x=%f, y=%f)", x, y)
 			}
 		}
