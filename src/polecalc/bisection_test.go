@@ -27,7 +27,6 @@ func TestLinear(t *testing.T) {
 
 // Does BisectionFullPrecision correctly solve arbitrary simple linear functions to machine precision?
 func TestLinearFullPrecision(t *testing.T) {
-	macheps := math.Pow(2.0, -53.0)
 	makeLinear := func(root float64) func(float64) float64 {
 		return func(x float64) float64 { return root - x }
 	}
@@ -37,7 +36,7 @@ func TestLinearFullPrecision(t *testing.T) {
 		if err != nil {
 			return false
 		}
-		return val - root <= macheps
+		return val - root <= MachEpsFloat64()
 	}
 	if err := quick.Check(checker, nil); err != nil {
 		t.Error(err)
