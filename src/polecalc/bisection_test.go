@@ -1,8 +1,10 @@
 package polecalc
 
-import "math"
-import "testing"
-import "testing/quick"
+import (
+	"math"
+	"testing"
+	"testing/quick"
+)
 
 // Does SolveBisection correctly solve a simple linear function?
 func TestLinear(t *testing.T) {

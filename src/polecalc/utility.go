@@ -5,6 +5,7 @@ import (
 	"os"
 )
 
+// Write Marshal-able object to a new file at filePath
 func WriteToJSONFile(object interface{}, filePath string) os.Error {
 	marshalled, err := json.Marshal(object)
 	if err != nil {
