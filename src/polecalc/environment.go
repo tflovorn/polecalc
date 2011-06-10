@@ -2,8 +2,10 @@ package polecalc
 
 import (
 	"os"
-	"io/ioutil"
+	"json"
 	"bytes"
+	"io/ioutil"
+	"reflect"
 )
 
 type Environment struct {
@@ -27,21 +29,38 @@ type Environment struct {
 	F0 float64	// superconducting order parameter
 }
 
+// Convert the Environment to string by returning a JSON representation
+func (env *Environment) String() string {
+	envBytes, err := json.Marshal(env)
+	if err != nil {
+		return ""
+	}
+	envStr := bytes.NewBuffer(envBytes).String()
+	return envStr
+}
+
 // Construct an Environment from the JSON file with given path
 func EnvironmentFromFile(filePath string) (*Environment, os.Error) {
 	fileContents, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return nil, err
 	}
-	jsonString := bytes.NewBuffer(fileContents).String()
-	return EnvironmentFromString(jsonString)
+	return EnvironmentFromBytes(fileContents)
 }
 
-// Construct an Environment from the given JSON string
-func EnvironmentFromString(jsonString string) (*Environment, os.Error) {
-	// is there a way to implement this without manually specifying parameter names?
-	// maybe use reflect package?
-	return nil, nil
+// Construct an Environment from the given JSON byte slice
+func EnvironmentFromBytes(jsonData []byte) (*Environment, os.Error) {
+	jsonObject := make(map[string]interface{})
+	if err := json.Unmarshal(jsonData, jsonObject); err != nil {
+		return nil, err
+	}
+	env := new(Environment)
+	envValue := reflect.Indirect(reflect.ValueOf(env))
+	for key, value := range jsonObject {
+		field := envValue.FieldByName(key)
+		field.Set(reflect.ValueOf(value))
+	}
+	return env, nil
 }
 
 // Write the Environment to a JSON file at the given path
