@@ -6,7 +6,7 @@ import (
 )
 
 // Does Square stay within (-Pi, Pi) x (-Pi, Pi)?
-// Extension: make pointsPerSide arbitrary (although not too big).
+// --- todo: make pointsPerSide arbitrary (although not too big) ---
 // Slow with large pointsPerSide - interesting performance test.
 func TestSquareBounds(t *testing.T) {
 	var pointsPerSide uint32 = 128
