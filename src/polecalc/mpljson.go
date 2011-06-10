@@ -65,18 +65,7 @@ func (graph *Graph) MarshalJSON() ([]byte, os.Error) {
 // graph_data must be a list or dictionary containing objects representable
 // in JSON.  Blocks until Python script is finished.
 func MakePlot(graphData interface{}, jsonFilePath string) os.Error {
-	marshalled, err := json.Marshal(graphData)
-	if err != nil {
-		return err
-	}
-	jsonFile, err := os.Create(jsonFilePath)
-	if err != nil {
-		return err
-	}
-	if _, err := jsonFile.Write(marshalled); err != nil {
-		return err
-	}
-	if err := jsonFile.Close(); err != nil {
+	if err := WriteToJSONFile(graphData, jsonFilePath); err != nil {
 		return err
 	}
 	wd, _ := os.Getwd()

@@ -1,0 +1,24 @@
+package polecalc
+
+import (
+	"json"
+	"os"
+)
+
+func WriteToJSONFile(object interface{}, filePath string) os.Error {
+	marshalled, err := json.Marshal(object)
+	if err != nil {
+		return err
+	}
+	jsonFile, err := os.Create(jsonFilePath)
+	if err != nil {
+		return err
+	}
+	if _, err := jsonFile.Write(marshalled); err != nil {
+		return err
+	}
+	if err := jsonFile.Close(); err != nil {
+		return err
+	}
+	return nil
+}
