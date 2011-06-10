@@ -3,16 +3,19 @@ package polecalc
 // Collects values passed on the newValues channel to find an average
 type Accumulator struct {
 	value float64		// sum of points seen so far
-
+	compensate float64	// used in Kahan summation to correct floating-point error
 	points uint64		// number of points seen
 	newValues chan float64	// channel for new values to be summed
 }
 
-// Handle data when it shows up on newValues
-// --- todo: use Kahan summation algorithm to reduce error ---
+// Handle data when it shows up on newValues.
+// Use Kahan summation algorithm to reduce error: implementation cribbed from Wikipedia
 func (accum *Accumulator) listen() {
 	for {
-		accum.value += <-accum.newValues
+		y := <-accum.newValues - accum.compensate
+		t := accum.value + y
+		accum.compensate = (t - accum.value) - y
+		accum.value = t
 		accum.points += 1
 	}
 }
@@ -25,8 +28,6 @@ func (accum *Accumulator) average() float64 {
 // Create a new accumulator listening on its channel
 func BuildAccumulator() *Accumulator {
 	accum := new(Accumulator)
-	accum.value = 0     // not really necessary - int initializes to 0
-	accum.points = 0
 	accum.newValues = make(chan float64)
 	go accum.listen()
 	return accum
