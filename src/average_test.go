@@ -12,6 +12,6 @@ func TestSinSin(t *testing.T) {
 		return math.Sin(k[0]) * math.Sin(k[1])
 	}
 	if avg := Average(128, worker, 4); avg > MachEpsFloat64() {
-		t.FailNow()
+		t.Fatalf("average of sin(kx)*sin(ky) too large (got %f)", avg)
 	}
 }
