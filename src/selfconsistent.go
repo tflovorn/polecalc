@@ -1,14 +1,6 @@
 package polecalc
 
-// Error returned when the self-consistent equation cannot be solved
-type SelfConsistentError struct {
-	ResponsibleEnv Environment
-	Reason         string
-}
-
-func (e *SelfConsistentError) String() string {
-	return e.Reason
-}
+import "os"
 
 // One-parameter scalar self-consistent equation
 type SelfConsistentEquation interface {
@@ -16,17 +8,26 @@ type SelfConsistentEquation interface {
 	AbsError(env Environment) float64
 	// set the appropriate variable in env to value
 	SetEnvironment(value float64, env *Environment)
+	// range of possible values for SetEnvironment
+	Range(env Environment) (float64, float64, os.Error)
 }
 
 // Return an Environment which solves eq to the given tolerance
-func Solve(eq SelfConsistentEquation, env Environment, tolerance float64) (Environment, *SelfConsistentError) {
-	error := func(value float64) float64 {
+func Solve(eq SelfConsistentEquation, env Environment, tolerance float64) (Environment, os.Error) {
+	eqError := func(value float64) float64 {
 		eq.SetEnvironment(value, &env)
 		return eq.AbsError(env)
 	}
-	// -- find solution --
-	error(0)        // dummy
-	solution := 0.0 // dummy
+	// if eq only has one root, left and right must bracket it
+	// --- todo: need to verify this ---
+	left, right, err := eq.Range(env)
+	if err != nil {
+		return env, err
+	}
+	solution, err := BisectionFullPrecision(eqError, left, right)
+	if err != nil {
+		return env, err
+	}
 	eq.SetEnvironment(solution, &env)
 	return env, nil
 }
@@ -39,7 +40,7 @@ type SelfConsistentSystem struct {
 }
 
 // Solve the self-consistent system, returning the resulting Environment
-func (system *SelfConsistentSystem) Solve(env Environment) (Environment, *SelfConsistentError) {
+func (system *SelfConsistentSystem) Solve(env Environment) (Environment, os.Error) {
 	i := 0
 	for !system.IsSolved(env) {
 		// this should never be true: if it is, failed to iterate
