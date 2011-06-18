@@ -2,20 +2,18 @@ package polecalc
 
 import "os"
 
-type Arguments interface{}
-
 // One-parameter scalar self-consistent equation
 type SelfConsistentEquation interface {
-	// return the absolute error associated with this equation under the given Arguments
-	AbsError(args Arguments) float64
+	// return the absolute error associated with this equation under the given interface{}
+	AbsError(args interface{}) float64
 	// set the appropriate variable in args to value
-	SetArguments(value float64, args *Arguments)
+	SetArguments(value float64, args *interface{})
 	// range of possible values for SetArguments
-	Range(args Arguments) (float64, float64, os.Error)
+	Range(args interface{}) (float64, float64, os.Error)
 }
 
-// Return an Arguments which solves eq to the given tolerance
-func Solve(eq SelfConsistentEquation, args Arguments, tolerance float64) (Arguments, os.Error) {
+// Return an interface{} which solves eq to the given tolerance
+func Solve(eq SelfConsistentEquation, args interface{}, tolerance float64) (interface{}, os.Error) {
 	eqError := func(value float64) float64 {
 		eq.SetArguments(value, &args)
 		return eq.AbsError(args)
@@ -41,8 +39,8 @@ type SelfConsistentSystem struct {
 	Tolerances []float64
 }
 
-// Solve the self-consistent system, returning the resulting Arguments
-func (system *SelfConsistentSystem) Solve(args Arguments) (Arguments, os.Error) {
+// Solve the self-consistent system, returning the resulting interface{}
+func (system *SelfConsistentSystem) Solve(args interface{}) (interface{}, os.Error) {
 	i := 0
 	for !system.IsSolved(args) {
 		// this should never be true: if it is, failed to iterate
@@ -68,7 +66,7 @@ func (system *SelfConsistentSystem) Solve(args Arguments) (Arguments, os.Error) 
 }
 
 // Check if the first (maxIndex + 1) equations are solved
-func (system *SelfConsistentSystem) solvedUpTo(args Arguments, maxIndex int) bool {
+func (system *SelfConsistentSystem) solvedUpTo(args interface{}, maxIndex int) bool {
 	for i, eq := range system.Equations {
 		if i > maxIndex {
 			break
@@ -81,7 +79,7 @@ func (system *SelfConsistentSystem) solvedUpTo(args Arguments, maxIndex int) boo
 }
 
 // Are all the self-consistent equations solved?
-func (system *SelfConsistentSystem) IsSolved(args Arguments) bool {
+func (system *SelfConsistentSystem) IsSolved(args interface{}) bool {
 	if len(system.Equations) == 0 {
 		return true
 	}
