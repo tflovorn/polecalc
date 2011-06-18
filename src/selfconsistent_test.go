@@ -3,7 +3,6 @@ package polecalc
 import (
 	"testing"
 	"os"
-	"fmt"
 )
 
 type LinearEquation struct {
@@ -29,7 +28,7 @@ func TestSolve(t *testing.T) {
 	guess := 0.0
 	solution, err := Solve(eq, &guess)
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("error: %s", err)
 	}
 	if solution == nil {
 		t.Fatalf("got nil solution")
