@@ -3,3 +3,4 @@
 *.6
 _test/
 _testmain.go
+_obj/

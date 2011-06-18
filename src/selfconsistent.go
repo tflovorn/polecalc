@@ -12,8 +12,8 @@ type SelfConsistentEquation interface {
 	Range(args interface{}) (float64, float64, os.Error)
 }
 
-// Return an interface{} which solves eq to the given tolerance
-func Solve(eq SelfConsistentEquation, args interface{}, tolerance float64) (interface{}, os.Error) {
+// Return an interface{} which solves eq to tolerance of BisectionFullPrecision
+func Solve(eq SelfConsistentEquation, args interface{}) (interface{}, os.Error) {
 	eqError := func(value float64) float64 {
 		eq.SetArguments(value, &args)
 		return eq.AbsError(args)
@@ -48,7 +48,7 @@ func (system *SelfConsistentSystem) Solve(args interface{}) (interface{}, os.Err
 			panic("self-consistent system overran bounds")
 		}
 		// set args to the value that solves the equation
-		newEnv, err := Solve(system.Equations[i], args, system.Tolerances[i])
+		newEnv, err := Solve(system.Equations[i], args)
 		if err != nil {
 			return args, err
 		}

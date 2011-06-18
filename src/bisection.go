@@ -1,25 +1,19 @@
 package polecalc
 
-import "math"
-
-// Error returned when a root cannot be found
-type RootError struct {
-	Reason string
-}
-
-func (e *RootError) String() string {
-	return e.Reason
-}
+import (
+	"math"
+	"os"
+)
 
 // One-dimensional scalar function - root can be found by bisection
 type Func1D func(float64) float64
 
 // Find the root of f in the interval (left, right) to precision epsilon using the bisection method
-func SolveBisection(f Func1D, left, right, epsilon float64) (float64, *RootError) {
+func SolveBisection(f Func1D, left, right, epsilon float64) (float64, os.Error) {
 	if left > right {
 		left, right = right, left
 	}
-	var error *RootError
+	var error os.Error
 	for math.Fabs(right-left) > 2*epsilon {
 		left, right, error = BisectionIterate(f, left, right)
 		if error != nil {
@@ -30,9 +24,9 @@ func SolveBisection(f Func1D, left, right, epsilon float64) (float64, *RootError
 }
 
 // Provide the next iteration of the bisection method for f on the interval (left, right)
-func BisectionIterate(f Func1D, left, right float64) (float64, float64, *RootError) {
+func BisectionIterate(f Func1D, left, right float64) (float64, float64, os.Error) {
 	if f(left)*f(right) > 0 {
-		return left, right, &RootError{"arguments do not bracket a root"}
+		return left, right, os.NewError("arguments do not bracket a root")
 	}
 	midpoint := (left + right) / 2.0
 	fl, fm, fr := f(left), f(midpoint), f(right)
@@ -55,11 +49,11 @@ func BisectionIterate(f Func1D, left, right float64) (float64, float64, *RootErr
 
 // Solve f for the root in interval (a, b) up to machine precision using bisection
 // Cribbed from implementation on Wikipedia page 'Bisection method'
-func BisectionFullPrecision(f Func1D, a, b float64) (float64, *RootError) {
+func BisectionFullPrecision(f Func1D, a, b float64) (float64, os.Error) {
 	fa, fb := f(a), f(b)
 	if !((fa >= 0 && fb <= 0) || (fa <= 0 && fb >= 0)) {
 		// no root bracketed
-		return 0, &RootError{"arguments do not bracket a root"}
+		return 0, os.NewError("arguments do not bracket a root")
 	}
 	var lo, hi float64
 	if fa <= 0 {
