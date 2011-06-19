@@ -3,6 +3,7 @@ include $(GOROOT)/src/Make.inc
 TARG=polecalc
 GOFILES=\
 bisection.go\
+bracket.go\
 environment.go\
 mesh2d.go\
 mesh_functions.go\

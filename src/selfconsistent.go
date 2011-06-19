@@ -20,7 +20,11 @@ func Solve(eq SelfConsistentEquation, args interface{}) (interface{}, os.Error) 
 	}
 	// if eq only has one root, left and right must bracket it
 	// --- todo: need to verify this ---
-	left, right, err := eq.Range(args)
+	leftEdge, rightEdge, err := eq.Range(args)
+	if err != nil {
+		return args, err
+	}
+	left, right, err := FindBracket(eqError, leftEdge, rightEdge)
 	if err != nil {
 		return args, err
 	}

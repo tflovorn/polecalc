@@ -1,0 +1,4 @@
+Testing zerotemp system solutions.  D1 cannot converge.
+
+Built root bracket finder to investigate.  Appears that D1 equation always 
+produces the same absError regardless of input.  Why?
