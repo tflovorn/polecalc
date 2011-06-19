@@ -8,6 +8,7 @@ mesh2d.go\
 mesh_functions.go\
 mpljson.go\
 selfconsistent.go\
+spectrum.go\
 utility.go\
 
 include $(GOROOT)/src/Make.pkg
