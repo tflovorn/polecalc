@@ -1,4 +1,5 @@
-Testing zerotemp system solutions.  D1 cannot converge.
+It lives! Converging on a solution in zerotemp_test.
 
-Built root bracket finder to investigate.  Appears that D1 equation always 
-produces the same absError regardless of input.  Why?
+One strange error.  Using 32 BracketNum() gives a NaN result for an AbsError
+somewhere along the line in solving zerotemp_test.  Shows up when the relevant
+variable (which one? haven't found out yet) is 0.

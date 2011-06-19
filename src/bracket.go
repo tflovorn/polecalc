@@ -28,9 +28,11 @@ func FindBracket(f Func1D, left, right float64) (float64, float64, os.Error) {
 	scale := (right - left) / float64(bracketNum)
 	a, b := left, left+scale
 	for sameSign(f(a), f(b)) {
-		if CloseToZero(f(b)) {
+		if f(b) == 0.0 {
+			//println("f(b) is 0")
 			return a, b + scale, nil
-		} else if CloseToZero(f(a)) {
+		} else if f(a) == 0.0 {
+			//println("f(a) is 0")
 			return a - scale, b, nil
 		}
 		a, b = b, b+scale
@@ -38,5 +40,6 @@ func FindBracket(f Func1D, left, right float64) (float64, float64, os.Error) {
 			return 0.0, 0.0, os.NewError("cannot find bracket")
 		}
 	}
+	//println(f(a), f(b), a, b)
 	return a, b, nil
 }

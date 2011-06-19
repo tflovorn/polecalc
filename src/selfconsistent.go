@@ -1,13 +1,16 @@
 package polecalc
 
-import "os"
+import (
+	"os"
+	"math"
+)
 
 // One-parameter scalar self-consistent equation
 type SelfConsistentEquation interface {
 	// return the absolute error associated with this equation under the given interface{}
 	AbsError(args interface{}) float64
 	// set the appropriate variable in args to value
-	SetArguments(value float64, args *interface{})
+	SetArguments(value float64, args interface{}) interface{}
 	// range of possible values for SetArguments
 	Range(args interface{}) (float64, float64, os.Error)
 }
@@ -15,11 +18,9 @@ type SelfConsistentEquation interface {
 // Return an interface{} which solves eq to tolerance of BisectionFullPrecision
 func Solve(eq SelfConsistentEquation, args interface{}) (interface{}, os.Error) {
 	eqError := func(value float64) float64 {
-		eq.SetArguments(value, &args)
+		args = eq.SetArguments(value, args)
 		return eq.AbsError(args)
 	}
-	// if eq only has one root, left and right must bracket it
-	// --- todo: need to verify this ---
 	leftEdge, rightEdge, err := eq.Range(args)
 	if err != nil {
 		return args, err
@@ -32,7 +33,7 @@ func Solve(eq SelfConsistentEquation, args interface{}) (interface{}, os.Error) 
 	if err != nil {
 		return args, err
 	}
-	eq.SetArguments(solution, &args)
+	args = eq.SetArguments(solution, args)
 	return args, nil
 }
 
@@ -75,7 +76,7 @@ func (system *SelfConsistentSystem) solvedUpTo(args interface{}, maxIndex int) b
 		if i > maxIndex {
 			break
 		}
-		if eq.AbsError(args) > system.Tolerances[i] {
+		if math.Fabs(eq.AbsError(args)) > system.Tolerances[i] {
 			return false
 		}
 	}

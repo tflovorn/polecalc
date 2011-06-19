@@ -29,9 +29,11 @@ func (eq ZeroTempD1Equation) AbsError(args interface{}) float64 {
 	return env.D1 - Average(env.GridLength, worker, env.NumProcs)
 }
 
-func (eq ZeroTempD1Equation) SetArguments(D1 float64, args *interface{}) {
-	env := (*args).(Environment)
+func (eq ZeroTempD1Equation) SetArguments(D1 float64, args interface{}) interface{} {
+	env := args.(Environment)
 	env.D1 = D1
+	env.EpsilonMin = EpsilonMin(env)
+	return env
 }
 
 func (eq ZeroTempD1Equation) Range(args interface{}) (float64, float64, os.Error) {
@@ -45,14 +47,15 @@ type ZeroTempMuEquation struct{}
 func (eq ZeroTempMuEquation) AbsError(args interface{}) float64 {
 	env := args.(Environment)
 	worker := func(k []float64) float64 {
-		return 0.5 * (1 - Xi(env, k)) / ZeroTempPairEnergy(env, k)
+		return 0.5 * (1 - Xi(env, k)/ZeroTempPairEnergy(env, k))
 	}
 	return env.X - Average(env.GridLength, worker, env.NumProcs)
 }
 
-func (eq ZeroTempMuEquation) SetArguments(Mu float64, args *interface{}) {
-	env := (*args).(Environment)
+func (eq ZeroTempMuEquation) SetArguments(Mu float64, args interface{}) interface{} {
+	env := args.(Environment)
 	env.Mu = Mu
+	return env
 }
 
 func (eq ZeroTempMuEquation) Range(args interface{}) (float64, float64, os.Error) {
@@ -70,12 +73,13 @@ func (eq ZeroTempF0Equation) AbsError(args interface{}) float64 {
 		sinPart := math.Sin(k[0]) + float64(env.Alpha)*math.Sin(k[1])
 		return sinPart * sinPart / ZeroTempPairEnergy(env, k)
 	}
-	return env.D1 - Average(env.GridLength, worker, env.NumProcs)
+	return 1/(env.T0+env.Tz) - Average(env.GridLength, worker, env.NumProcs)
 }
 
-func (eq ZeroTempF0Equation) SetArguments(F0 float64, args *interface{}) {
-	env := (*args).(Environment)
+func (eq ZeroTempF0Equation) SetArguments(F0 float64, args interface{}) interface{} {
+	env := args.(Environment)
 	env.F0 = F0
+	return env
 }
 
 func (eq ZeroTempF0Equation) Range(args interface{}) (float64, float64, os.Error) {

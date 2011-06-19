@@ -16,9 +16,10 @@ func (eq LinearEquation) AbsError(args interface{}) float64 {
 	return eq.root - vars[eq.myVar]
 }
 
-func (eq LinearEquation) SetArguments(x float64, args *interface{}) {
-	vars := (*args).(map[string]float64)
+func (eq LinearEquation) SetArguments(x float64, args interface{}) interface{} {
+	vars := (args).(map[string]float64)
 	vars[eq.myVar] = x
+	return vars
 }
 
 func (eq LinearEquation) Range(args interface{}) (float64, float64, os.Error) {

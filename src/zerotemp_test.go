@@ -3,7 +3,7 @@ package polecalc
 import "testing"
 
 func TestKnownZeroTempSystem(t *testing.T) {
-	tolerances := []float64{1e-6, 1e-6, 1e-6}
+	tolerances := []float64{1e-9, 1e-9, 1e-9}
 	system := NewZeroTempSystem(tolerances)
 	env, err := EnvironmentFromFile("environment_test.json")
 	if err != nil {
