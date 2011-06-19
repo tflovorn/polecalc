@@ -2,10 +2,10 @@ include $(GOROOT)/src/Make.inc
 
 TARG=polecalc
 GOFILES=\
-average.go\
 bisection.go\
 environment.go\
 mesh2d.go\
+mesh_functions.go\
 mpljson.go\
 selfconsistent.go\
 utility.go\

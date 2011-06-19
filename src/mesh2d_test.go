@@ -10,10 +10,10 @@ import (
 // Slow with large pointsPerSide - interesting performance test.
 func TestSquareBounds(t *testing.T) {
 	var pointsPerSide uint32 = 128
-	cmesh, done := Square(pointsPerSide)
+	cmesh := Square(pointsPerSide)
+	done := make(chan bool)
 	go func() {
-		for {
-			point := <-cmesh
+		for point, ok := <-cmesh; ok; point, ok = <-cmesh {
 			x, y := point[0], point[1]
 			if x > math.Pi || x < -math.Pi {
 				t.Fatalf("x out of bounds (x=%f, y=%f)", x, y)
@@ -22,22 +22,24 @@ func TestSquareBounds(t *testing.T) {
 				t.Fatalf("y out of bounds (x=%f, y=%f)", x, y)
 			}
 		}
+		done <- true
 	}()
-	<-done
+	<-done // wait on one worker
 }
 
 // Does Square produce the expected number of points?
 func TestSquarePointNumber(t *testing.T) {
 	var pointsPerSide uint32 = 128
 	var count uint64 = 0
-	cmesh, done := Square(pointsPerSide)
+	done := make(chan bool)
+	cmesh := Square(pointsPerSide)
 	go func() {
-		for {
-			<-cmesh
+		for _, ok := <-cmesh; ok; _, ok = <-cmesh {
 			count++
 		}
+		done <- true
 	}()
-	<-done
+	<-done // wait on one worker
 	points64 := uint64(pointsPerSide)
 	expectedCount := points64 * points64
 	if count != expectedCount {
