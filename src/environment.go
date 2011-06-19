@@ -12,7 +12,7 @@ import (
 type Environment struct {
 	// program parameters
 	GridLength uint32 // points per side in Brillouin zone; typical value ~ 64
-	NumProcs uint16 // number of processes to use for mesh functions
+	NumProcs   uint16 // number of processes to use for mesh functions
 	InitD1,    // initial values for self-consistent parameters
 	InitMu,
 	InitF0 float64

@@ -15,9 +15,9 @@ type GridListener interface {
 // --- Accumulator ---
 // Collects values passed through grab() to find an average
 type Accumulator struct {
-	value      float64      // sum of points seen so far
-	compensate float64      // used in Kahan summation to correct floating-point error
-	points     uint64       // number of points seen
+	value      float64 // sum of points seen so far
+	compensate float64 // used in Kahan summation to correct floating-point error
+	points     uint64  // number of points seen
 }
 
 func (accum Accumulator) initialize() GridListener {

@@ -6,7 +6,7 @@ import "math"
 // The first contains points on a square grid with boundaries (-Pi, Pi) x (-Pi, Pi).
 // (this is the first Brillouin zone of a square lattice)
 // When all points have been consumed, the value true is passed on the second channel.
-func Square(pointsPerSide uint32) (chan []float64) {
+func Square(pointsPerSide uint32) chan []float64 {
 	cmesh := make(chan []float64)
 	go helpSquare(cmesh, pointsPerSide)
 	return cmesh
