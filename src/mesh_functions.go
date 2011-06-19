@@ -1,15 +1,14 @@
 package polecalc
 
 import "math"
-import "fmt"
 
 // A function which does calculations based on data passed in on cmesh and returns results through accum
 type Consumer func(point []float64) float64
 
 // A type which can absorb grid points and return a result
 type GridListener interface {
-	initialize()
-	grab(newValue float64)
+	initialize() GridListener
+	grab(newValue float64) GridListener
 	result() float64
 }
 
@@ -21,20 +20,22 @@ type Accumulator struct {
 	points     uint64       // number of points seen
 }
 
-func (accum Accumulator) initialize() {
+func (accum Accumulator) initialize() GridListener {
 	accum.value = 0.0
 	accum.compensate = 0.0
 	accum.points = 0
+	return accum
 }
 
 // Handle new data.
 // Use Kahan summation algorithm to reduce error: implementation cribbed from Wikipedia
-func (accum Accumulator) grab(newValue float64) {
+func (accum Accumulator) grab(newValue float64) GridListener {
 	y := newValue - accum.compensate
 	t := accum.value + y
 	accum.compensate = (t - accum.value) - y
 	accum.value = t
 	accum.points += 1
+	return accum
 }
 
 // Average of points passed in through grab()
@@ -54,14 +55,16 @@ type MinimumData struct {
 	minimum float64
 }
 
-func (minData MinimumData) initialize() {
+func (minData MinimumData) initialize() GridListener {
 	minData.minimum = math.MaxFloat64
+	return minData
 }
 
-func (minData MinimumData) grab(newValue float64) {
+func (minData MinimumData) grab(newValue float64) GridListener {
 	if newValue < minData.minimum {
 		minData.minimum = newValue
 	}
+	return minData
 }
 
 func (minData MinimumData) result() float64 {
@@ -79,12 +82,12 @@ func BuildMinimumData() *MinimumData {
 func DoGridListen(pointsPerSide uint32, worker Consumer, numWorkers uint16, listener GridListener) float64 {
 	cmesh := Square(pointsPerSide)
 	done := make(chan bool)
-	listener.initialize()
+	listener = listener.initialize()
 	var i uint16 = 0
 	for i = 0; i < numWorkers; i++ {
 		go func() {
 			for point, ok := <-cmesh; ok; point, ok = <-cmesh {
-				listener.grab(worker(point))
+				listener = listener.grab(worker(point))
 			}
 			done <- true
 		}()
@@ -92,11 +95,6 @@ func DoGridListen(pointsPerSide uint32, worker Consumer, numWorkers uint16, list
 	for doneCount := 0; doneCount < int(numWorkers); doneCount++ {
 		<-done
 	}
-	minData, ok := listener.(MinimumData)
-	if ok {
-		fmt.Println(minData.minimum)
-	}
-	fmt.Println(listener.result())
 	return listener.result()
 }
 
