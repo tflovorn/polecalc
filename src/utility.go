@@ -6,10 +6,6 @@ import (
 	"math"
 )
 
-// One-dimensional scalar function - root can be guess by FindBracket and found
-// by bisection
-type Func1D func(float64) float64
-
 // Write Marshal-able object to a new file at filePath
 func WriteToJSONFile(object interface{}, filePath string) os.Error {
 	marshalled, err := json.Marshal(object)
@@ -32,16 +28,4 @@ func WriteToJSONFile(object interface{}, filePath string) os.Error {
 // Machine epsilon (upper bound on error due to rounding) for float64
 func MachEpsFloat64() float64 {
 	return math.Pow(2.0, -53.0)
-}
-
-// Return true iff x is within MachEpsFloat64 of 0
-func CloseToZero(x float64) bool {
-	if x == 0 {
-		return true
-	} else if x > 0 && x < MachEpsFloat64() {
-		return true
-	} else if x < 0 && x > -MachEpsFloat64() {
-		return true
-	}
-	return false
 }

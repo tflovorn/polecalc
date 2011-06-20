@@ -1,5 +1,0 @@
-It lives! Converging on a solution in zerotemp_test.
-
-One strange error.  Using 32 BracketNum() gives a NaN result for an AbsError
-somewhere along the line in solving zerotemp_test.  Shows up when the relevant
-variable (which one? haven't found out yet) is 0.
