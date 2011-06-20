@@ -6,6 +6,9 @@ import (
 	"math"
 )
 
+// One-dimensional scalar function - used for bisection and bracket
+type Func1D func(float64) float64
+
 // Write Marshal-able object to a new file at filePath
 func WriteToJSONFile(object interface{}, filePath string) os.Error {
 	marshalled, err := json.Marshal(object)

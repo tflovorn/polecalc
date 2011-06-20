@@ -60,7 +60,7 @@ func (eq ZeroTempMuEquation) SetArguments(Mu float64, args interface{}) interfac
 
 func (eq ZeroTempMuEquation) Range(args interface{}) (float64, float64, os.Error) {
 	env := args.(Environment)
-	return -2 * env.T0, 2 * env.T0, nil
+	return -2 * env.T0, -MachEpsFloat64(), nil
 }
 
 // --- F0 equation ---
@@ -94,7 +94,7 @@ func ZeroTempDelta(env Environment, k []float64) float64 {
 	return 4 * env.F0 * (env.T0 + env.Tz) * (sx + float64(env.Alpha)*sy)
 }
 
-// Energy of a pair of holes. (?)
+// Energy of a pair of holes.
 func ZeroTempPairEnergy(env Environment, k []float64) float64 {
 	xi := Xi(env, k)
 	delta := ZeroTempDelta(env, k)

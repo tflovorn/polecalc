@@ -5,9 +5,6 @@ import (
 	"os"
 )
 
-// One-dimensional scalar function - root can be found by bisection
-type Func1D func(float64) float64
-
 // Find the root of f in the interval (left, right) to precision epsilon using the bisection method
 func SolveBisection(f Func1D, left, right, epsilon float64) (float64, os.Error) {
 	if left > right {
