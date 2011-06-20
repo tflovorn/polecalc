@@ -2,12 +2,13 @@ package polecalc
 
 import "os"
 
-// Lazy hack - this really should be a parameter in Environment but using that
-// from selfconsistent would require all args passed to it to know this value
-// -- need an interface for selfconsistent args --
+// (should probably set these constants through a configuration method)
+// Number of steps to take in the first attempt to find a bracket.
 const InitialBracketNumber uint = 32
+// If using more steps than this to find a bracket, stop.
 const MaxBracketNumber uint = 8192 // 8 iterations from 32 (32 * 2^8)
 
+// Find a pair of points which bracket a root of f between left and right.
 func FindBracket(f Func1D, left, right float64) (float64, float64, os.Error) {
 	if left == right {
 		return 0.0, 0.0, os.NewError("must give two distinct points to find bracket")
@@ -18,6 +19,7 @@ func FindBracket(f Func1D, left, right float64) (float64, float64, os.Error) {
 	return bracketHelper(f, left, right, InitialBracketNumber)
 }
 
+// Use a number of divisions equal to bracketNum to find a root.
 func bracketHelper(f Func1D, left, right float64, bracketNum uint) (float64, float64, os.Error) {
 	scale := (right - left) / float64(bracketNum)
 	a, b := left, left+scale
@@ -40,6 +42,7 @@ func bracketHelper(f Func1D, left, right float64, bracketNum uint) (float64, flo
 	return a, b, nil
 }
 
+// If x and y don't have the same sign, we know they bracket a root.
 func sameSign(x, y float64) bool {
 	if x >= 0 && y >= 0 {
 		return true

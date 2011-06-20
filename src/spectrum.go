@@ -2,6 +2,18 @@ package polecalc
 
 import "math"
 
+// Single-hole hopping energy.  Minimum must be 0.
+func Epsilon(env Environment, k []float64) float64 {
+	return EpsilonBar(env, k) - env.EpsilonMin
+}
+
+// Single-hole hopping energy without fixed minimum.
+func EpsilonBar(env Environment, k []float64) float64 {
+	sx, sy := math.Sin(k[0]), math.Sin(k[1])
+	return 2*env.Th()*((sx+sy)*(sx+sy)-1) + 4*(env.D1*env.T0-env.Thp)*sx*sy
+}
+
+// Find the minimum of EpsilonBar() to help in calculating Epsilon()
 func EpsilonMin(env Environment) float64 {
 	worker := func(k []float64) float64 {
 		return EpsilonBar(env, k)
@@ -9,15 +21,7 @@ func EpsilonMin(env Environment) float64 {
 	return Minimum(env.GridLength, worker, env.NumProcs)
 }
 
-func Epsilon(env Environment, k []float64) float64 {
-	return EpsilonBar(env, k) - env.EpsilonMin
-}
-
-func EpsilonBar(env Environment, k []float64) float64 {
-	sx, sy := math.Sin(k[0]), math.Sin(k[1])
-	return 2*env.Th()*((sx+sy)*(sx+sy)-1) + 4*(env.D1*env.T0-env.Thp)*sx*sy
-}
-
+// Effective hopping energy (epsilon - mu).  Minimum is -mu.
 func Xi(env Environment, k []float64) float64 {
 	return Epsilon(env, k) - env.Mu
 }

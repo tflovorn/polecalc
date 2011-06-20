@@ -16,10 +16,10 @@ func NewZeroTempSystem(tolerances []float64) *SelfConsistentSystem {
 }
 
 // --- D1 equation ---
+// D1 = -1/(2N) \sum_k (1 - xi(k)/E(k)) * sin(kx) * sin(ky)
 
 type ZeroTempD1Equation struct{}
 
-// D1 = -1/2N \sum_k (1 - xi(k)) * sin(kx) * sin(ky)
 func (eq ZeroTempD1Equation) AbsError(args interface{}) float64 {
 	env := args.(Environment)
 	worker := func(k []float64) float64 {
@@ -32,6 +32,7 @@ func (eq ZeroTempD1Equation) AbsError(args interface{}) float64 {
 func (eq ZeroTempD1Equation) SetArguments(D1 float64, args interface{}) interface{} {
 	env := args.(Environment)
 	env.D1 = D1
+	// Epsilon depends on D1 so we may have changed the minimum
 	env.EpsilonMin = EpsilonMin(env)
 	return env
 }
@@ -41,6 +42,7 @@ func (eq ZeroTempD1Equation) Range(args interface{}) (float64, float64, os.Error
 }
 
 // --- mu equation ---
+// x = 1/(2N) \sum_k (1 - xi(k)/E(k))
 
 type ZeroTempMuEquation struct{}
 
@@ -58,12 +60,15 @@ func (eq ZeroTempMuEquation) SetArguments(Mu float64, args interface{}) interfac
 	return env
 }
 
+// mu < 0 is enforced since for mu >= 0 terms with 1 / PairEnergy() can blow up
+// Factor of -2 is arbitrary, may need to be enlarged for some Environments
 func (eq ZeroTempMuEquation) Range(args interface{}) (float64, float64, os.Error) {
 	env := args.(Environment)
 	return -2 * env.T0, -MachEpsFloat64(), nil
 }
 
 // --- F0 equation ---
+// 1/(t0+tz) = 1/N \sum_k (sin(kx) + alpha*sin(ky))^2 / E(k)
 
 type ZeroTempF0Equation struct{}
 
@@ -86,7 +91,7 @@ func (eq ZeroTempF0Equation) Range(args interface{}) (float64, float64, os.Error
 	return 0.0, 1.0, nil
 }
 
-// --- energy scales and utility ---
+// --- energy scales and related functions ---
 
 // Holon gap energy. (?)
 func ZeroTempDelta(env Environment, k []float64) float64 {
