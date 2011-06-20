@@ -89,8 +89,7 @@ func EnvironmentFromBytes(jsonData []byte) (*Environment, os.Error) {
 		// (or come up with a more clever solution).
 		if fieldType == "uint16" {
 			field.Set(reflect.ValueOf(uint16(value.(float64))))
-		}
-		if fieldType == "uint32" {
+		} else if fieldType == "uint32" {
 			field.Set(reflect.ValueOf(uint32(value.(float64))))
 		} else if fieldType == "int8" {
 			field.Set(reflect.ValueOf(int8(value.(float64))))
