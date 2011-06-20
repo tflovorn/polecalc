@@ -48,7 +48,7 @@ func (env *Environment) Initialize() {
 	env.D1 = env.InitD1
 	env.Mu = env.InitMu
 	env.F0 = env.InitF0
-	// must be determined after system is mostly initialized
+	// must be determined after system is otherwise initialized
 	env.EpsilonMin = EpsilonMin(*env)
 }
 
@@ -79,14 +79,21 @@ func EnvironmentFromBytes(jsonData []byte) (*Environment, os.Error) {
 	if err := json.Unmarshal(jsonData, &jsonObject); err != nil {
 		return nil, err
 	}
+	return EnvironmentFromObject(jsonObject)
+}
+
+// Construct an Environment from the given JSON object.
+// Self-consistent parameters are not set to values given by Init fields.
+func EnvironmentFromObject(jsonObject map[string]interface{}) (*Environment, os.Error) {
 	env := new(Environment)
 	envValue := reflect.Indirect(reflect.ValueOf(env))
 	for key, value := range jsonObject {
 		field := envValue.FieldByName(key)
 		fieldType := field.Type().Name()
-		// Hack to get around Unmarshal treating all numbers as float64's.
-		// Will need to extend this for other types if they show up in Environment
-		// (or come up with a more clever solution).
+		// Hack to get around Unmarshal treating all numbers as 
+		// float64's. Will need to extend this for other types if they 
+		// show up in Environment (or come up with a more clever 
+		// solution).
 		if fieldType == "uint16" {
 			field.Set(reflect.ValueOf(uint16(value.(float64))))
 		} else if fieldType == "uint32" {
