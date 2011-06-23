@@ -120,33 +120,57 @@ func NewMaximumData(worker Consumer) *MaximumData {
 }
 
 // --- accumulator for (discrete approximation) delta functions ---
-type DeltaTermsFunc func(q []float64) ([]float64, []float64)
+
+// returns pair of slices of bin variable values and their associciated 
+// coefficients which are affected at the given point
+// (for Gc0, bin variable is omega)
+type DeltaTermsFunc func(point []float64) ([]float64, []float64)
 
 type DeltaBinner struct {
-	DeltaTerms        DeltaTermsFunc
-	BinStart, BinStop float64
-	NumBins           uint
-	Bins              []float64 // value of the function at various omega values
-	Compensates       []float64 // compensation values for Kahan summation
-	NumPoints         uint64
+	deltaTerms        DeltaTermsFunc
+	binStart, binStop float64
+	numBins           uint
+	bins              []float64 // value of the function at various omega values
+	compensates       []float64 // compensation values for Kahan summation
+	numPoints         uint64
 }
 
 func (binner DeltaBinner) initialize() GridListener {
-	return nil
+	binner.numPoints = 0
+	for i, _ := range binner.bins {
+		binner.bins[i] = 0.0
+		binner.compensates[i] = 0.0
+	}
+	return binner
 }
 
 func (binner DeltaBinner) grab(point []float64) GridListener {
-	return nil
+	omegas, coeffs := binner.deltaTerms(point)
+	for i, omega := range omegas {
+		n := binner.binVarToIndex(omega)
+		binner.bins[n], binner.compensates[n] = KahanSum(coeffs[i], binner.bins[n], binner.compensates[n])
+	}
+	binner.numPoints += 1
+	return binner
 }
 
-func (binner DeltaBinner) result() ([]float64, []float64) {
-	return nil, nil
+func (binner DeltaBinner) binVarToIndex(binVar float64) uint {
+	step := math.Fabs(binner.binStop-binner.binStart) / float64(binner.numBins)
+	return uint(math.Floor((binVar - binner.binStart) / step))
+}
+
+func (binner DeltaBinner) result() interface{} {
+	result := make([]float64, binner.numBins)
+	for i, val := range binner.bins {
+		result[i] = val / float64(binner.numPoints)
+	}
+	return result
 }
 
 func NewDeltaBinner(deltaTerms DeltaTermsFunc, binStart, binStop float64, numBins uint) *DeltaBinner {
-	// each value will be initialized to 0 (that's what we want)
 	bins, compensates := make([]float64, numBins), make([]float64, numBins)
-	binner := &DeltaBinner{deltaTerms, binStart, binStop, numBins, bins, compensates, 0.0}
+	binner := &DeltaBinner{deltaTerms, binStart, binStop, numBins, bins, compensates, 0}
+	binner.initialize()
 	return binner
 }
 
