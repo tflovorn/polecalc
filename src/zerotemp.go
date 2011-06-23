@@ -116,14 +116,16 @@ func ZeroTempFermi(energy float64) float64 {
 }
 
 // --- Green's function for the physical electron ---
-
+/*
 // imaginary part - values for all omega are calculated simultaneously, so
 // return a function of omega
 func ZeroTempImG0(env Environment, k []float64) func(Environment, float64) float64 {
-	maxWorker := func(k []float64) {
+	maxWorker := func(k []float64) float64 {
 		return ZeroTempPairEnergy(env, k)
 	}
 	pairEnergyMax := Maximum(env.GridLength, maxWorker, env.NumProcs)
 	omegaMin, omegaMax := 0.0, env.Lambda+pairEnergyMax
 	bins := env.ImG0Bins
+	return nil
 }
+*/

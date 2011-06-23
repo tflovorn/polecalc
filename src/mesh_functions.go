@@ -32,12 +32,16 @@ func (accum Accumulator) initialize() GridListener {
 // Use Kahan summation algorithm to reduce error: implementation cribbed from Wikipedia
 func (accum Accumulator) grab(point []float64) GridListener {
 	newValue := accum.worker(point)
-	y := newValue - accum.compensate
-	t := accum.value + y
-	accum.compensate = (t - accum.value) - y
-	accum.value = t
+	accum.value, accum.compensate = KahanSum(newValue, accum.value, accum.compensate)
 	accum.points += 1
 	return accum
+}
+
+func KahanSum(extraValue, oldValue, compensate float64) (float64, float64) {
+	y := extraValue - compensate
+	newValue := oldValue + y
+	newCompensate := (newValue - oldValue) - y
+	return newValue, newCompensate
 }
 
 // Average of points passed in through grab()
@@ -46,7 +50,7 @@ func (accum Accumulator) result() interface{} {
 }
 
 // Create a new accumulator
-func BuildAccumulator(worker Consumer) *Accumulator {
+func NewAccumulator(worker Consumer) *Accumulator {
 	accum := new(Accumulator)
 	accum.worker = worker
 	accum.initialize()
@@ -76,7 +80,7 @@ func (minData MinimumData) result() interface{} {
 	return minData.minimum
 }
 
-func BuildMinimumData(worker Consumer) *MinimumData {
+func NewMinimumData(worker Consumer) *MinimumData {
 	minData := new(MinimumData)
 	minData.worker = worker
 	minData.initialize()
@@ -108,31 +112,44 @@ func (maxData MaximumData) result() interface{} {
 	return maxData.maximum
 }
 
-func BuildMaximumData(worker Consumer) *MaximumData {
+func NewMaximumData(worker Consumer) *MaximumData {
 	maxData := new(MaximumData)
 	maxData.worker = worker
 	maxData.initialize()
 	return maxData
 }
-/*
+
 // --- accumulator for (discrete approximation) delta functions ---
+type DeltaTermsFunc func(q []float64) ([]float64, []float64)
+
 type DeltaBinner struct {
-	DeltaTerms func(q []float64) ([]float64, []float64)
-	BinsStart, BinsStop float64
-	NumBins uint
-	Bins []float64
+	DeltaTerms        DeltaTermsFunc
+	BinStart, BinStop float64
+	NumBins           uint
+	Bins              []float64 // value of the function at various omega values
+	Compensates       []float64 // compensation values for Kahan summation
+	NumPoints         uint64
 }
 
 func (binner DeltaBinner) initialize() GridListener {
-
+	return nil
 }
 
 func (binner DeltaBinner) grab(point []float64) GridListener {
-
+	return nil
 }
 
-func (binner DeltaBinner) result(
-*/
+func (binner DeltaBinner) result() ([]float64, []float64) {
+	return nil, nil
+}
+
+func NewDeltaBinner(deltaTerms DeltaTermsFunc, binStart, binStop float64, numBins uint) *DeltaBinner {
+	// each value will be initialized to 0 (that's what we want)
+	bins, compensates := make([]float64, numBins), make([]float64, numBins)
+	binner := &DeltaBinner{deltaTerms, binStart, binStop, numBins, bins, compensates, 0.0}
+	return binner
+}
+
 // -- utility functions --
 // assumes numWorkers > 0
 func DoGridListen(pointsPerSide uint32, numWorkers uint16, listener GridListener) interface{} {
@@ -160,16 +177,16 @@ func DoGridListen(pointsPerSide uint32, numWorkers uint16, listener GridListener
 // numWorkers is uint16 to avoid spawning a ridiculous number of processes.
 // Consumer is defined in utility.go
 func Average(pointsPerSide uint32, worker Consumer, numWorkers uint16) float64 {
-	accum := BuildAccumulator(worker)
+	accum := NewAccumulator(worker)
 	return DoGridListen(pointsPerSide, numWorkers, *accum).(float64)
 }
 
 func Minimum(pointsPerSide uint32, worker Consumer, numWorkers uint16) float64 {
-	minData := BuildMinimumData(worker)
+	minData := NewMinimumData(worker)
 	return DoGridListen(pointsPerSide, numWorkers, *minData).(float64)
 }
 
 func Maximum(pointsPerSide uint32, worker Consumer, numWorkers uint16) float64 {
-	maxData := BuildMaximumData(worker)
+	maxData := NewMaximumData(worker)
 	return DoGridListen(pointsPerSide, numWorkers, *maxData).(float64)
 }
