@@ -93,7 +93,7 @@ func (eq ZeroTempF0Equation) Range(args interface{}) (float64, float64, os.Error
 
 // --- energy scales and related functions ---
 
-// Holon gap energy. (?)
+// Holon (pair?) gap energy.
 func ZeroTempDelta(env Environment, k []float64) float64 {
 	sx, sy := math.Sin(k[0]), math.Sin(k[1])
 	return 4 * env.F0 * (env.T0 + env.Tz) * (sx + float64(env.Alpha)*sy)
@@ -113,4 +113,17 @@ func ZeroTempFermi(energy float64) float64 {
 		return 1.0
 	}
 	return 0.0
+}
+
+// --- Green's function for the physical electron ---
+
+// imaginary part - values for all omega are calculated simultaneously, so
+// return a function of omega
+func ZeroTempImG0(env Environment, k []float64) func(Environment, float64) float64 {
+	maxWorker := func(k []float64) {
+		return ZeroTempPairEnergy(env, k)
+	}
+	pairEnergyMax := Maximum(env.GridLength, maxWorker, env.NumProcs)
+	omegaMin, omegaMax := 0.0, env.Lambda+pairEnergyMax
+	bins := env.ImG0Bins
 }
