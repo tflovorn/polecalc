@@ -20,7 +20,8 @@ type Environment struct {
 
 	// system constant physical parameters
 	Alpha int8 // either -1 (d-wave) or +1 (s-wave)
-	T0,   // Overall energy scale (default = 1.0)
+	J,    // singlet energy
+	T0, // Overall energy scale (default = 1.0)
 	Tz, // z-direction hopping energy (|tz| < 0.3 or so)
 	Thp, // Diagonal (next-nearest-neighbor) hopping energy (similar range as tz)
 	X, // Doping / holon excess (0 < x < ~0.2)
@@ -72,6 +73,15 @@ func EnvironmentFromFile(filePath string) (*Environment, os.Error) {
 		return nil, err
 	}
 	return EnvironmentFromBytes(fileContents)
+}
+
+// Convert to string and pass to EnvironmentFromBytes
+func EnvironmentFromString(jsonData string) (*Environment, os.Error) {
+	jsonBytes, err := StringToBytes(jsonData)
+	if err != nil {
+		return nil, err
+	}
+	return EnvironmentFromBytes(jsonBytes)
 }
 
 // Construct an Environment from the given JSON byte slice.

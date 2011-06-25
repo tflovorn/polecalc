@@ -106,6 +106,11 @@ func ZeroTempPairEnergy(env Environment, k []float64) float64 {
 	return math.Sqrt(xi*xi + delta*delta)
 }
 
+// Energy of a singlet (?)
+func ZeroTempOmega(env Environment, k []float64) float64 {
+	return 0.0
+}
+
 // Fermi distribution at T = 0 is H(-x), where H is the Heaviside step function.
 // H(0) is taken to be 1.
 func ZeroTempFermi(energy float64) float64 {
@@ -116,16 +121,22 @@ func ZeroTempFermi(energy float64) float64 {
 }
 
 // --- Green's function for the physical electron ---
-/*
+
 // imaginary part - values for all omega are calculated simultaneously, so
-// return a function of omega
-func ZeroTempImG0(env Environment, k []float64) func(Environment, float64) float64 {
+// return two slices of floats.  first is omega values, second is coefficients
+func ZeroTempImG0(env Environment, k []float64) ([]float64, []float64) {
 	maxWorker := func(k []float64) float64 {
 		return ZeroTempPairEnergy(env, k)
 	}
 	pairEnergyMax := Maximum(env.GridLength, maxWorker, env.NumProcs)
-	omegaMin, omegaMax := 0.0, env.Lambda+pairEnergyMax
-	bins := env.ImG0Bins
-	return nil
+	maxAbsOmega := env.Lambda + pairEnergyMax
+	omegaMin, omegaMax := -maxAbsOmega, maxAbsOmega
+	deltaTerms := func(q []float64) ([]float64, []float64) {
+		//	omegas := []float64{}
+		return nil, nil
+	}
+	binner := NewDeltaBinner(deltaTerms, omegaMin, omegaMax, env.ImG0Bins)
+	result := DeltaBin(env.GridLength, binner, env.NumProcs)
+	omegas := binner.BinVarValues()
+	return omegas, result
 }
-*/

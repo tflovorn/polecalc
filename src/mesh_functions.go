@@ -151,11 +151,6 @@ func (binner DeltaBinner) grab(point []float64) GridListener {
 	return binner
 }
 
-func (binner DeltaBinner) BinVarToIndex(binVar float64) uint {
-	step := math.Fabs(binner.binStop-binner.binStart) / float64(binner.numBins)
-	return uint(math.Floor((binVar - binner.binStart) / step))
-}
-
 func (binner DeltaBinner) result() interface{} {
 	result := make([]float64, binner.numBins)
 	for i, val := range binner.bins {
@@ -164,7 +159,30 @@ func (binner DeltaBinner) result() interface{} {
 	return result
 }
 
+func (binner DeltaBinner) Step() float64 {
+	return math.Fabs(binner.binStop-binner.binStart) / float64(binner.numBins)
+}
+
+func (binner DeltaBinner) BinVarToIndex(binVar float64) int {
+	return int(math.Floor((binVar - binner.binStart) / binner.Step()))
+}
+
+func (binner DeltaBinner) IndexToBinVar(index int) float64 {
+	return binner.binStart + binner.Step()*float64(index)
+}
+
+func (binner DeltaBinner) BinVarValues() []float64 {
+	values := make([]float64, binner.numBins)
+	for i, _ := range values {
+		values[i] = binner.IndexToBinVar(i)
+	}
+	return values
+}
+
 func NewDeltaBinner(deltaTerms DeltaTermsFunc, binStart, binStop float64, numBins uint) *DeltaBinner {
+	if binStart > binStop {
+		binStart, binStop = binStop, binStart
+	}
 	bins, compensates := make([]float64, numBins), make([]float64, numBins)
 	binner := &DeltaBinner{deltaTerms, binStart, binStop, numBins, bins, compensates, 0}
 	return binner
