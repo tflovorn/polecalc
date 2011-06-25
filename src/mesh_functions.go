@@ -53,7 +53,6 @@ func (accum Accumulator) result() interface{} {
 func NewAccumulator(worker Consumer) *Accumulator {
 	accum := new(Accumulator)
 	accum.worker = worker
-	accum.initialize()
 	return accum
 }
 
@@ -83,7 +82,6 @@ func (minData MinimumData) result() interface{} {
 func NewMinimumData(worker Consumer) *MinimumData {
 	minData := new(MinimumData)
 	minData.worker = worker
-	minData.initialize()
 	return minData
 }
 
@@ -115,7 +113,6 @@ func (maxData MaximumData) result() interface{} {
 func NewMaximumData(worker Consumer) *MaximumData {
 	maxData := new(MaximumData)
 	maxData.worker = worker
-	maxData.initialize()
 	return maxData
 }
 
@@ -147,14 +144,14 @@ func (binner DeltaBinner) initialize() GridListener {
 func (binner DeltaBinner) grab(point []float64) GridListener {
 	omegas, coeffs := binner.deltaTerms(point)
 	for i, omega := range omegas {
-		n := binner.binVarToIndex(omega)
+		n := binner.BinVarToIndex(omega)
 		binner.bins[n], binner.compensates[n] = KahanSum(coeffs[i], binner.bins[n], binner.compensates[n])
 	}
 	binner.numPoints += 1
 	return binner
 }
 
-func (binner DeltaBinner) binVarToIndex(binVar float64) uint {
+func (binner DeltaBinner) BinVarToIndex(binVar float64) uint {
 	step := math.Fabs(binner.binStop-binner.binStart) / float64(binner.numBins)
 	return uint(math.Floor((binVar - binner.binStart) / step))
 }
@@ -170,7 +167,6 @@ func (binner DeltaBinner) result() interface{} {
 func NewDeltaBinner(deltaTerms DeltaTermsFunc, binStart, binStop float64, numBins uint) *DeltaBinner {
 	bins, compensates := make([]float64, numBins), make([]float64, numBins)
 	binner := &DeltaBinner{deltaTerms, binStart, binStop, numBins, bins, compensates, 0}
-	binner.initialize()
 	return binner
 }
 
@@ -213,4 +209,10 @@ func Minimum(pointsPerSide uint32, worker Consumer, numWorkers uint16) float64 {
 func Maximum(pointsPerSide uint32, worker Consumer, numWorkers uint16) float64 {
 	maxData := NewMaximumData(worker)
 	return DoGridListen(pointsPerSide, numWorkers, *maxData).(float64)
+}
+
+// Instead of taking a worker directly, this functions takes a *DeltaBinner
+// (to avoid passing in all the params for DeltaBinner)
+func DeltaBin(pointsPerSide uint32, deltaTerms *DeltaBinner, numWorkers uint16) []float64 {
+	return DoGridListen(pointsPerSide, numWorkers, deltaTerms).([]float64)
 }
