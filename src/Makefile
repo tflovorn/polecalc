@@ -11,6 +11,7 @@ mpljson.go\
 selfconsistent.go\
 spectrum.go\
 utility.go\
+tridiagonal.go\
 zerotemp.go\
 
 include $(GOROOT)/src/Make.pkg
