@@ -16,17 +16,20 @@ func NewZeroTempSystem(tolerances []float64) *SelfConsistentSystem {
 }
 
 // --- D1 equation ---
+
 // D1 = -1/(2N) \sum_k (1 - xi(k)/E(k)) * sin(kx) * sin(ky)
-
-type ZeroTempD1Equation struct{}
-
-func (eq ZeroTempD1Equation) AbsError(args interface{}) float64 {
-	env := args.(Environment)
+func ZeroTempD1AbsError(env Environment) float64 {
 	worker := func(k []float64) float64 {
 		sx, sy := math.Sin(k[0]), math.Sin(k[1])
 		return -0.5 * (1 - Xi(env, k)/ZeroTempPairEnergy(env, k)) * sx * sy
 	}
 	return env.D1 - Average(env.GridLength, worker, env.NumProcs)
+}
+
+type ZeroTempD1Equation struct{}
+
+func (eq ZeroTempD1Equation) AbsError(args interface{}) float64 {
+	return ZeroTempD1AbsError(args.(Environment))
 }
 
 func (eq ZeroTempD1Equation) SetArguments(D1 float64, args interface{}) interface{} {
@@ -42,16 +45,19 @@ func (eq ZeroTempD1Equation) Range(args interface{}) (float64, float64, os.Error
 }
 
 // --- mu equation ---
+
 // x = 1/(2N) \sum_k (1 - xi(k)/E(k))
-
-type ZeroTempMuEquation struct{}
-
-func (eq ZeroTempMuEquation) AbsError(args interface{}) float64 {
-	env := args.(Environment)
+func ZeroTempMuAbsError(env Environment) float64 {
 	worker := func(k []float64) float64 {
 		return 0.5 * (1 - Xi(env, k)/ZeroTempPairEnergy(env, k))
 	}
 	return env.X - Average(env.GridLength, worker, env.NumProcs)
+}
+
+type ZeroTempMuEquation struct{}
+
+func (eq ZeroTempMuEquation) AbsError(args interface{}) float64 {
+	return ZeroTempMuAbsError(args.(Environment))
 }
 
 func (eq ZeroTempMuEquation) SetArguments(Mu float64, args interface{}) interface{} {
@@ -68,17 +74,20 @@ func (eq ZeroTempMuEquation) Range(args interface{}) (float64, float64, os.Error
 }
 
 // --- F0 equation ---
+
 // 1/(t0+tz) = 1/N \sum_k (sin(kx) + alpha*sin(ky))^2 / E(k)
-
-type ZeroTempF0Equation struct{}
-
-func (eq ZeroTempF0Equation) AbsError(args interface{}) float64 {
-	env := args.(Environment)
+func ZeroTempF0AbsError(env Environment) float64 {
 	worker := func(k []float64) float64 {
 		sinPart := math.Sin(k[0]) + float64(env.Alpha)*math.Sin(k[1])
 		return sinPart * sinPart / ZeroTempPairEnergy(env, k)
 	}
 	return 1/(env.T0+env.Tz) - Average(env.GridLength, worker, env.NumProcs)
+}
+
+type ZeroTempF0Equation struct{}
+
+func (eq ZeroTempF0Equation) AbsError(args interface{}) float64 {
+	return ZeroTempF0AbsError(args.(Environment))
 }
 
 func (eq ZeroTempF0Equation) SetArguments(F0 float64, args interface{}) interface{} {
@@ -108,7 +117,11 @@ func ZeroTempPairEnergy(env Environment, k []float64) float64 {
 
 // Energy of a singlet (?)
 func ZeroTempOmega(env Environment, k []float64) float64 {
-	return 0.0
+	phi := func(k []float64) float64 {
+		// where are J and A specified?
+		return 4 * env.J * env.A * (math.Sin(k[0]) + math.Sin(k[1]))
+	}(k)
+	return math.Sqrt(env.Lambda*env.Lambda - phi*phi)
 }
 
 // Fermi distribution at T = 0 is H(-x), where H is the Heaviside step function.
@@ -131,9 +144,20 @@ func ZeroTempImG0(env Environment, k []float64) ([]float64, []float64) {
 	pairEnergyMax := Maximum(env.GridLength, maxWorker, env.NumProcs)
 	maxAbsOmega := env.Lambda + pairEnergyMax
 	omegaMin, omegaMax := -maxAbsOmega, maxAbsOmega
+	plusMinus := func(x, y float64) (float64, float64) {
+		return x + y, x - y
+	}
 	deltaTerms := func(q []float64) ([]float64, []float64) {
-		//	omegas := []float64{}
-		return nil, nil
+		omega_q := ZeroTempOmega(env, q)
+		E_h := ZeroTempPairEnergy(env, q)
+		omegas := []float64{omega_q - E_h, omega_q + E_h, -omega_q - E_h, -omega_q + E_h}
+		lambda_p, lambda_m := plusMinus(1, env.Lambda/ZeroTempOmega(env, q))
+		xi_p, xi_m := plusMinus(1, Xi(env, q)/ZeroTempPairEnergy(env, q))
+		// 0 here is really bose function of omega_q = ZeroTempOmega(q)
+		// since omega_q > 0 and mu < 0, bose function result is 0
+		f_p, f_m := plusMinus(0, ZeroTempFermi(ZeroTempPairEnergy(env, []float64{q[0] - k[0], q[1] - k[1]})))
+		coeffs := []float64{0.25 * lambda_p * xi_p * f_p, 0.25 * lambda_p * xi_m * (f_m + 1), -0.25 * lambda_m * xi_m * (f_m + 1), -0.25 * lambda_m * xi_m * f_p}
+		return omegas, coeffs
 	}
 	binner := NewDeltaBinner(deltaTerms, omegaMin, omegaMax, env.ImG0Bins)
 	result := DeltaBin(env.GridLength, binner, env.NumProcs)

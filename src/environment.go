@@ -1,6 +1,7 @@
 package polecalc
 
 import (
+	"fmt"
 	"os"
 	"json"
 	"bytes"
@@ -21,6 +22,7 @@ type Environment struct {
 	// system constant physical parameters
 	Alpha int8 // either -1 (d-wave) or +1 (s-wave)
 	J,    // singlet energy
+	A, // ????
 	T0, // Overall energy scale (default = 1.0)
 	Tz, // z-direction hopping energy (|tz| < 0.3 or so)
 	Thp, // Diagonal (next-nearest-neighbor) hopping energy (similar range as tz)
@@ -53,6 +55,10 @@ func (env *Environment) Initialize() {
 	env.F0 = env.InitF0
 	// must be determined after system is otherwise initialized
 	env.EpsilonMin = EpsilonMin(*env)
+}
+
+func (env *Environment) ZeroTempErrors() string {
+	return fmt.Sprintf("errors - d1: %f; mu: %f; f0: %f", ZeroTempD1AbsError(*env), ZeroTempMuAbsError(*env), ZeroTempF0AbsError(*env))
 }
 
 // Convert the Environment to string by returning a JSON representation
