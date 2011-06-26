@@ -11,9 +11,9 @@ import (
 //  0 1 4]  x3]    1]
 // the solution is given by: x = [3/14 1/7 3/14]
 func TestTridiagonal3(t *testing.T) {
-	a := []float64{0, 1, 1}
+	a := []float64{1, 1}
 	b := []float64{4, 4, 4}
-	c := []float64{1, 1, 0}
+	c := []float64{1, 1}
 	d := []float64{1, 1, 1}
 	x := TridiagonalSolve(a, b, c, d)
 	expected := []float64{3.0 / 14.0, 1.0 / 7.0, 3.0 / 14.0}
