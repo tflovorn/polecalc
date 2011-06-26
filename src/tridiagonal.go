@@ -12,7 +12,7 @@ func TridiagonalSolve(a, b, c, d []float64) []float64 {
 	n := len(b)
 	x := make([]float64, n)
 	// algorithm expects these to be the same length as b
-	a = expandLeft(a)
+	a = PadLeftWith0(a)
 	c = append(c, 0)
 	// forward sweep: modify coefficients
 	// first row
@@ -35,7 +35,7 @@ func TridiagonalSolve(a, b, c, d []float64) []float64 {
 }
 
 // Return a new slice which is expanded by adding a 0 on the 0th index
-func expandLeft(xs []float64) []float64 {
+func PadLeftWith0(xs []float64) []float64 {
 	r := make([]float64, len(xs)+1)
 	for i, _ := range r {
 		if i == 0 {
