@@ -1,6 +1,5 @@
-// Cubic spline interpolation
-// (need to support integration of discrete points)
-// Based on description of algorithm found at
+// Cubic spline interpolation and integration of discrete points
+// Based on description of algorithm found at:
 // http://web.archive.org/web/20090408054627/http://online.redwoods.cc.ca.us/instruct/darnold/laproj/Fall98/SkyMeg/Proj.PDF
 package polecalc
 
@@ -8,6 +7,34 @@ import (
 	"os"
 	"math"
 )
+
+// Integrate the cubic spline interpolation of y from x = left to x = right.  
+// xs is an ordered slice of equally spaced x values.
+// ys is a slice of the corresponding y values.
+// Assume left < right, left >= xs[0], and right <= xs[len(xs)-1].
+// n is the number of intervals to use in building the cubic spline.
+func SplineIntegral(xs, ys []float64, left, right float64, n uint) (float64, os.Error) {
+	if left > right {
+		left, right = right, left
+	}
+	s, err := NewCubicSpline(xs, ys)
+	if err != nil {
+		return 0.0, err
+	}
+	xMin, xMax := s.Range()
+	if left < xMin || right > xMax {
+		return 0.0, os.NewError("integral arguments out of bounds")
+	}
+	k, q := s.indexOf(left), s.indexOf(right)
+	first := s.antiDeriv(k, xs[k+1]) - s.antiDeriv(k, left)
+	middle, compensate := 0.0, 0.0
+	for i := k + 1; i < q; i++ {
+		integral := s.antiDeriv(i, xs[i+1]) - s.antiDeriv(i, xs[i])
+		middle, compensate = KahanSum(integral, middle, compensate)
+	}
+	last := s.antiDeriv(q, right) - s.antiDeriv(q, xs[q])
+	return first + middle + last, nil
+}
 
 type CubicSpline struct {
 	a, b, c, d []float64 // length n - 1
@@ -48,10 +75,17 @@ func (s *CubicSpline) At(x float64) float64 {
 }
 
 // Individual spline functions si(x) at index i, position x
-// Assumes i > 0 and x is in the appropriate range for i
+// Assumes i > 0 and x is in the appropriate range for si
 func (s *CubicSpline) splineAt(i int, x float64) float64 {
 	dx := x - s.xs[i]
 	return s.a[i]*math.Pow(dx, 3.0) + s.b[i]*math.Pow(dx, 2.0) + s.c[i]*dx + s.d[i]
+}
+
+// Antiderivative of the spline functions (with integration constant = 0)
+// Makes the same assumptions as splineAt.
+func (s *CubicSpline) antiDeriv(i int, x float64) float64 {
+	dx := x - s.xs[i]
+	return s.a[i]*math.Pow(dx, 4.0)/4 + s.b[i]*math.Pow(dx, 3.0)/3 + s.c[i]*math.Pow(dx, 2.0)/2 + s.d[i]*x
 }
 
 // Interpolation range of the spline
@@ -67,7 +101,7 @@ func (s *CubicSpline) indexOf(x float64) int {
 	xMin, xMax := s.Range()
 	// -1 to accomodate having one less interpolating function than the
 	// number of points
-	step := (xMax - xMin) / float64(len(s.xs) - 1)
+	step := (xMax - xMin) / float64(len(s.xs)-1)
 	return int(math.Floor((x - xMin) / step))
 }
 
@@ -80,7 +114,7 @@ func splineCoeffs(xs []float64, ys []float64) ([]float64, []float64, []float64, 
 	for i, _ := range a {
 		a[i] = (M[i+1] - M[i]) / (6 * h)
 		b[i] = M[i] / 2
-		c[i] = (ys[i+1] - ys[i]) / h - h * (M[i+1]+2*M[i]) / 6
+		c[i] = (ys[i+1]-ys[i])/h - h*(M[i+1]+2*M[i])/6
 		d[i] = ys[i]
 	}
 	return a, b, c, d
