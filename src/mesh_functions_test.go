@@ -9,8 +9,8 @@ import (
 // Check if the average found is under machine epsilon.
 // Also check if the minimum is close to -1 (arbitrary tolerance 1e-9)
 func TestSinSin(t *testing.T) {
-	worker := func(k []float64) float64 {
-		return math.Sin(k[0]) * math.Sin(k[1])
+	worker := func(k Vector2) float64 {
+		return math.Sin(k.X) * math.Sin(k.Y)
 	}
 	if avg := Average(128, worker, 4); math.IsNaN(avg) || avg > MachEpsFloat64() {
 		t.Fatalf("average of sin(kx)*sin(ky) incorrect (got %f)", avg)
@@ -24,7 +24,7 @@ func TestSinSin(t *testing.T) {
 func TestTwoDeltas(t *testing.T) {
 	var pointsPerSide uint32 = 64
 	deltaPoints := []float64{5.5, 10.5}
-	deltaTerms := func(q []float64) ([]float64, []float64) {
+	deltaTerms := func(q Vector2) ([]float64, []float64) {
 		omegas := deltaPoints
 		coeffs := []float64{1.0, 1.0}
 		return omegas, coeffs

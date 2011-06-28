@@ -3,12 +3,12 @@ package polecalc
 import "math"
 
 // A function which does calculations based on data passed in on cmesh and returns results through accum
-type Consumer func(point []float64) float64
+type Consumer func(point Vector2) float64
 
 // A type which can absorb grid points and return a result
 type GridListener interface {
 	initialize() GridListener
-	grab(point []float64) GridListener
+	grab(point Vector2) GridListener
 	result() interface{}
 }
 
@@ -30,7 +30,7 @@ func (accum Accumulator) initialize() GridListener {
 
 // Handle new data.
 // Use Kahan summation algorithm to reduce error: implementation cribbed from Wikipedia
-func (accum Accumulator) grab(point []float64) GridListener {
+func (accum Accumulator) grab(point Vector2) GridListener {
 	newValue := accum.worker(point)
 	accum.value, accum.compensate = KahanSum(newValue, accum.value, accum.compensate)
 	accum.points += 1
@@ -67,7 +67,7 @@ func (minData MinimumData) initialize() GridListener {
 	return minData
 }
 
-func (minData MinimumData) grab(point []float64) GridListener {
+func (minData MinimumData) grab(point Vector2) GridListener {
 	newValue := minData.worker(point)
 	if newValue < minData.minimum {
 		minData.minimum = newValue
@@ -98,7 +98,7 @@ func (maxData MaximumData) initialize() GridListener {
 	return maxData
 }
 
-func (maxData MaximumData) grab(point []float64) GridListener {
+func (maxData MaximumData) grab(point Vector2) GridListener {
 	newValue := maxData.worker(point)
 	if newValue > maxData.maximum {
 		maxData.maximum = newValue
@@ -121,7 +121,7 @@ func NewMaximumData(worker Consumer) *MaximumData {
 // returns pair of slices of bin variable values and their associciated 
 // coefficients which are affected at the given point
 // (for Gc0, bin variable is omega)
-type DeltaTermsFunc func(point []float64) ([]float64, []float64)
+type DeltaTermsFunc func(point Vector2) ([]float64, []float64)
 
 type DeltaBinner struct {
 	deltaTerms        DeltaTermsFunc
@@ -141,7 +141,7 @@ func (binner DeltaBinner) initialize() GridListener {
 	return binner
 }
 
-func (binner DeltaBinner) grab(point []float64) GridListener {
+func (binner DeltaBinner) grab(point Vector2) GridListener {
 	omegas, coeffs := binner.deltaTerms(point)
 	for i, omega := range omegas {
 		n := binner.BinVarToIndex(omega)

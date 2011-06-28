@@ -14,7 +14,7 @@ func TestSquareBounds(t *testing.T) {
 	done := make(chan bool)
 	go func() {
 		for point, ok := <-cmesh; ok; point, ok = <-cmesh {
-			x, y := point[0], point[1]
+			x, y := point.X, point.Y
 			if x > math.Pi || x < -math.Pi {
 				t.Fatalf("x out of bounds (x=%f, y=%f)", x, y)
 			}

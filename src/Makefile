@@ -13,6 +13,7 @@ selfconsistent.go\
 spectrum.go\
 utility.go\
 tridiagonal.go\
+vector.go\
 zerotemp.go\
 
 include $(GOROOT)/src/Make.pkg

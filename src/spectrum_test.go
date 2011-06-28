@@ -12,7 +12,7 @@ func TestEpsilonMin(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	worker := func(k []float64) float64 {
+	worker := func(k Vector2) float64 {
 		return Epsilon(*env, k)
 	}
 	min := Minimum(env.GridLength, worker, env.NumProcs)
