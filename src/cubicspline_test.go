@@ -80,7 +80,7 @@ func TestCubicSplineIntegral3Points(t *testing.T) {
 		ys[i] = someCubic(xs[i])
 	}
 	xl, xr := -9.0, 1.0
-	val, err := SplineIntegral(xs, ys, xl, xr, uint(n))
+	val, err := SplineIntegral(xs, ys, xl, xr)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -121,7 +121,7 @@ func ZeroTempOmega(env Environment, k Vector2) float64 {
 	k0_minus := k0_plus.Mult(-1)
 	// --- this is kind of sketchy: take smaller deviation from minimum ---
 	kDev := math.Fmin(k.Sub(k0_plus).NormSquared(), k.Sub(k0_minus).NormSquared())
-	return math.Sqrt(math.Pow(env.DeltaS, 2.0) + math.Pow(kDev * env.CS, 2.0))
+	return math.Sqrt(math.Pow(env.DeltaS, 2.0) + math.Pow(kDev*env.CS, 2.0))
 }
 
 // Fermi distribution at T = 0 is H(-x), where H is the Heaviside step function.
@@ -137,7 +137,7 @@ func ZeroTempFermi(energy float64) float64 {
 
 // imaginary part - values for all omega are calculated simultaneously, so
 // return two slices of floats.  first is omega values, second is coefficients
-func ZeroTempImG0(env Environment, k Vector2) ([]float64, []float64) {
+func ZeroTempImGc0(env Environment, k Vector2) ([]float64, []float64) {
 	maxWorker := func(k Vector2) float64 {
 		return ZeroTempPairEnergy(env, k)
 	}
@@ -159,8 +159,39 @@ func ZeroTempImG0(env Environment, k Vector2) ([]float64, []float64) {
 		coeffs := []float64{0.25 * lambda_p * xi_p * f_p, 0.25 * lambda_p * xi_m * (f_m + 1), -0.25 * lambda_m * xi_m * (f_m + 1), -0.25 * lambda_m * xi_m * f_p}
 		return omegas, coeffs
 	}
-	binner := NewDeltaBinner(deltaTerms, omegaMin, omegaMax, env.ImG0Bins)
+	binner := NewDeltaBinner(deltaTerms, omegaMin, omegaMax, env.ImGc0Bins)
 	result := DeltaBin(env.GridLength, binner, env.NumProcs)
 	omegas := binner.BinVarValues()
 	return omegas, result
+}
+
+func ZeroTempReGc0(env Environment, k Vector2, omega float64) (float64, os.Error) {
+	imPartOmegaVals, imPartFuncVals := ZeroTempImGc0(env, k)
+	imPart, err := NewCubicSpline(imPartOmegaVals, imPartFuncVals)
+	if err != nil {
+		return 0.0, err
+	}
+	omegaMax, omegaMin := imPart.Range()
+	// assume that Im(Gc0) is smooth near omegaPrime
+	integrand := func(omegaPrime float64) float64 {
+		return (1 / math.Pi) * imPart.At(omegaPrime) / (omegaPrime - omega)
+	}
+	singularLeft := omega - env.ReGc0dw
+	singularRight := omega + env.ReGc0dw
+	leftOmega := MakeRange(omegaMin, singularLeft, env.ReGc0Points)
+	rightOmega := MakeRange(singularRight, omegaMax, env.ReGc0Points)
+	leftIntegrand, rightIntegrand := make([]float64, env.ReGc0Points), make([]float64, env.ReGc0Points)
+	for i := 0; i < int(env.ReGc0Points); i++ {
+		leftIntegrand[i] = integrand(leftOmega[i])
+		rightIntegrand[i] = integrand(rightOmega[i])
+	}
+	leftIntegral, err := SplineIntegral(leftOmega, leftIntegrand, omegaMin, singularLeft)
+	if err != nil {
+		return 0.0, err
+	}
+	rightIntegral, err := SplineIntegral(rightOmega, rightIntegrand, singularRight, omegaMax)
+	if err != nil {
+		return 0.0, err
+	}
+	return leftIntegral + rightIntegral, nil
 }

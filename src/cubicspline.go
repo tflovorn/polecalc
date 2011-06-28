@@ -12,8 +12,7 @@ import (
 // xs is an ordered slice of equally spaced x values.
 // ys is a slice of the corresponding y values.
 // Assume left < right, left >= xs[0], and right <= xs[len(xs)-1].
-// n is the number of intervals to use in building the cubic spline.
-func SplineIntegral(xs, ys []float64, left, right float64, n uint) (float64, os.Error) {
+func SplineIntegral(xs, ys []float64, left, right float64) (float64, os.Error) {
 	if left > right {
 		left, right = right, left
 	}

@@ -12,23 +12,23 @@ import (
 // Holds all the necessary data for evaluating functions in the cuprate system
 type Environment struct {
 	// program parameters
-	GridLength uint32 // points per side in Brillouin zone; typical value ~ 64
-	ImG0Bins   uint   // number of bins to use when calculating the imaginary part of the electron Green's function
-	NumProcs   uint16 // number of processes to use for mesh functions
-	InitD1,    // initial values for self-consistent parameters
+	GridLength  uint32  // points per side in Brillouin zone; typical value ~ 64
+	ImGc0Bins   uint    // number of bins to use when calculating the imaginary part of the electron Green's function
+	ReGc0Points uint    // number of points to use on each side of the 1/x singularity when calculating ReGc0
+	ReGc0dw     float64 // distance away from the singularity to step when calculating ReGc0
+	NumProcs    uint16  // number of processes to use for mesh functions
+	InitD1,     // initial values for self-consistent parameters
 	InitMu,
 	InitF0 float64
 
 	// system constant physical parameters
 	Alpha int8 // either -1 (d-wave) or +1 (s-wave)
-	J,    // singlet energy
-	A, // ????
-	T0, // Overall energy scale (default = 1.0)
+	T0,   // Overall energy scale (default = 1.0)
 	Tz, // z-direction hopping energy (|tz| < 0.3 or so)
 	Thp, // Diagonal (next-nearest-neighbor) hopping energy (similar range as tz)
 	X, // Doping / holon excess (0 < x < ~0.2)
 	Lambda, // spinon chemical potential
-	DeltaS,	// spin gap
+	DeltaS, // spin gap
 	CS float64 // coefficient for k deviation in omega_q
 
 	// self-consistently determined physical parameters

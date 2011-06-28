@@ -47,3 +47,13 @@ func StringToBytes(str string) ([]byte, os.Error) {
 	}
 	return bytes, nil
 }
+
+// Make a set of points evenly spaced between left and right (inclusive)
+func MakeRange(left, right float64, num uint) []float64 {
+	step := (right - left) / float64(num-1)
+	vals := make([]float64, num)
+	for i := 0; i < int(num); i++ {
+		vals[i] = left + float64(i)*step
+	}
+	return vals
+}
