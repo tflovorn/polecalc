@@ -109,3 +109,90 @@ func ZeroTempFermi(energy float64) float64 {
 	}
 	return 0.0
 }
+<<<<<<< Updated upstream
+=======
+
+// --- Green's function for the physical electron ---
+
+// imaginary part - values for all omega are calculated simultaneously, so
+// return two slices of floats.  first is omega values, second is coefficients
+func ZeroTempImGc0(env Environment, k Vector2) ([]float64, []float64) {
+	maxWorker := func(k Vector2) float64 {
+		return ZeroTempPairEnergy(env, k)
+	}
+	pairEnergyMax := Maximum(env.GridLength, maxWorker, env.NumProcs)
+	maxAbsOmega := env.Lambda + pairEnergyMax
+	omegaMin, omegaMax := -maxAbsOmega, maxAbsOmega
+	plusMinus := func(x, y float64) (float64, float64) {
+		return x + y, x - y
+	}
+	deltaTerms := func(q Vector2) ([]float64, []float64) {
+		omega_q := ZeroTempOmega(env, q)
+		E_h := ZeroTempPairEnergy(env, q)
+		omegas := []float64{omega_q - E_h, omega_q + E_h, -omega_q - E_h, -omega_q + E_h}
+		lambda_p, lambda_m := plusMinus(1, env.Lambda/ZeroTempOmega(env, q))
+		xi_p, xi_m := plusMinus(1, Xi(env, q)/ZeroTempPairEnergy(env, q))
+		// 0 here is really bose function of omega_q = ZeroTempOmega(q)
+		// since omega_q > 0 and mu < 0, bose function result is 0
+		f_p, f_m := plusMinus(0, ZeroTempFermi(ZeroTempPairEnergy(env, q.Sub(k))))
+		coeffs := []float64{0.25 * lambda_p * xi_p * f_p, 0.25 * lambda_p * xi_m * (f_m + 1), -0.25 * lambda_m * xi_m * (f_m + 1), -0.25 * lambda_m * xi_m * f_p}
+		return omegas, coeffs
+	}
+	binner := NewDeltaBinner(deltaTerms, omegaMin, omegaMax, env.ImGc0Bins)
+	result := DeltaBin(env.GridLength, binner, env.NumProcs)
+	omegas := binner.BinVarValues()
+	return omegas, result
+}
+
+func ZeroTempReGc0(env Environment, k Vector2, omega float64) (float64, os.Error) {
+	imPartOmegaVals, imPartFuncVals := ZeroTempImGc0(env, k)
+	imPart, err := NewCubicSpline(imPartOmegaVals, imPartFuncVals)
+	if err != nil {
+		return 0.0, err
+	}
+	omegaMin, omegaMax := imPart.Range()
+	// assume that Im(Gc0) is smooth near omegaPrime
+	integrand := func(omegaPrime float64) float64 {
+		if omegaMin <= omega || omegaMax >= omega {
+			println("about to check at ", omegaPrime)
+			return (1 / math.Pi) * imPart.At(omegaPrime) / (omegaPrime - omega)
+		}
+		return 0.0
+	}
+	// there will be a singularity
+	if omegaMin <= omega || omegaMax >= omega {
+		println("in sing")
+		singularLeft := omega - env.ReGc0dw
+		singularRight := omega + env.ReGc0dw
+		leftOmega := MakeRange(omegaMin, singularLeft, env.ReGc0Points)
+		rightOmega := MakeRange(singularRight, omegaMax, env.ReGc0Points)
+		leftIntegrand, rightIntegrand := make([]float64, env.ReGc0Points), make([]float64, env.ReGc0Points)
+		for i := 0; i < int(env.ReGc0Points); i++ {
+			leftIntegrand[i] = integrand(leftOmega[i])
+			rightIntegrand[i] = integrand(rightOmega[i])
+		}
+		leftIntegral, err := SplineIntegral(leftOmega, leftIntegrand, omegaMin, singularLeft)
+		if err != nil {
+			return 0.0, err
+		}
+		rightIntegral, err := SplineIntegral(rightOmega, rightIntegrand, singularRight, omegaMax)
+		if err != nil {
+			return 0.0, err
+		}
+		return leftIntegral + rightIntegral, nil
+	}
+	// otherwise: no singularity
+	println("in no_sing")
+	noSingPoints := 2*env.ReGc0Points
+	omegaVals := MakeRange(omegaMin, omegaMax, noSingPoints)
+	integrandVal := make([]float64, noSingPoints)
+	for i := 0; i < int(noSingPoints); i++ {
+		integrandVal[i] = integrand(omegaVals[i])
+	}
+	integral, err := SplineIntegral(omegaVals, integrandVal, omegaMin, omegaMax)
+	if err != nil {
+		return 0.0, err
+	}
+	return integral, nil
+}
+>>>>>>> Stashed changes
