@@ -56,14 +56,41 @@ func TestGc0(t *testing.T) {
 		}
 		solvedEnv = *cacheEnv
 	}
-	numOmega := uint(128)
-	omegas := MakeRange(-15.0, 15.0, numOmega)
+	numOmega := uint(1024)
+	k := Vector2{0.1, 0.1}
+	imOmegas, imCalcValues := ZeroTempImGc0(solvedEnv, k)
+	imSpline, err := NewCubicSpline(imOmegas, imCalcValues)
+	if err != nil {
+		t.Fatal(err)
+	}
+	imOmegaMin, imOmegaMax := imSpline.Range()
+	omegas := MakeRange(-5.0, 5.0, numOmega)
 	realValues := make([]float64, numOmega)
+	imValues := make([]float64, numOmega)
 	for i := 0; i < int(numOmega); i++ {
-		g, err := ZeroTempReGc0(solvedEnv, Vector2{0.1, 0.1}, omegas[i])
+		if omegas[i] < imOmegaMin || omegas[i] > imOmegaMax {
+			imValues[i] = 0.0
+		} else {
+			imValues[i] = imSpline.At(omegas[i])
+		}
+		g, err := ZeroTempReGc0(solvedEnv, k, omegas[i])
 		if err != nil {
 			t.Fatal(err)
 		}
 		realValues[i] = g
 	}
+	reGraph := NewGraph()
+	imGraph := NewGraph()
+	reGraph.SetGraphParameters(map[string]string{"graph_filepath":"zerotemp_test_re_gc0"})
+	imGraph.SetGraphParameters(map[string]string{"graph_filepath":"zerotemp_test_im_gc0"})
+	reData := make([][]float64, len(omegas))
+	imData := make([][]float64, len(omegas))
+	for i, _ := range reData {
+		reData[i] = []float64{omegas[i], realValues[i]}
+		imData[i] = []float64{omegas[i], imValues[i]}
+	}
+	reGraph.AddSeries(map[string]string{"label":"re_gc0"}, reData)
+	imGraph.AddSeries(map[string]string{"label":"im_gc0"}, imData)
+	MakePlot(reGraph, "zerotemp_test_re_gc0")
+	MakePlot(imGraph, "zerotemp_test_im_gc0")
 }
