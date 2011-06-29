@@ -191,11 +191,11 @@ func ZeroTempReGc0(env Environment, k Vector2, omega float64) (float64, os.Error
 			leftIntegrand[i] = integrand(leftOmega[i])
 			rightIntegrand[i] = integrand(rightOmega[i])
 		}
-		leftIntegral, err := SplineIntegral(leftOmega, leftIntegrand, omegaMin+eps, singularLeft-eps)
+		leftIntegral, err := SplineIntegral(leftOmega, leftIntegrand, omegaMin+2*eps, singularLeft-eps)
 		if err != nil {
 			return 0.0, err
 		}
-		rightIntegral, err := SplineIntegral(rightOmega, rightIntegrand, singularRight+eps, omegaMax-eps)
+		rightIntegral, err := SplineIntegral(rightOmega, rightIntegrand, singularRight+eps, omegaMax-2*eps)
 		if err != nil {
 			return 0.0, err
 		}
@@ -208,7 +208,7 @@ func ZeroTempReGc0(env Environment, k Vector2, omega float64) (float64, os.Error
 	for i := 0; i < int(noSingPoints); i++ {
 		integrandVal[i] = integrand(omegaVals[i])
 	}
-	integral, err := SplineIntegral(omegaVals, integrandVal, omegaMin+eps, omegaMax-eps)
+	integral, err := SplineIntegral(omegaVals, integrandVal, omegaMin+2*eps, omegaMax-2*eps)
 	if err != nil {
 		return 0.0, err
 	}

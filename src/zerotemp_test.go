@@ -29,7 +29,6 @@ func TestKnownZeroTempSystem(t *testing.T) {
 	if !reflect.DeepEqual(solvedEnv, *expectedEnv) {
 		t.Fatalf("unknown solution to zero-temp system: got\n%s, expected\n%s", (&solvedEnv).String(), expectedEnv.String())
 	}
-	//	println(solvedEnv.ZeroTempErrors())
 }
 
 func TestGc0(t *testing.T) {
@@ -57,9 +56,14 @@ func TestGc0(t *testing.T) {
 		}
 		solvedEnv = *cacheEnv
 	}
-	g, err := ZeroTempReGc0(solvedEnv, Vector2{0.1, 0.1}, 0.1)
-	if err != nil {
-		t.Fatal(err)
+	numOmega := uint(128)
+	omegas := MakeRange(-15.0, 15.0, numOmega)
+	realValues := make([]float64, numOmega)
+	for i := 0; i < int(numOmega); i++ {
+		g, err := ZeroTempReGc0(solvedEnv, Vector2{0.1, 0.1}, omegas[i])
+		if err != nil {
+			t.Fatal(err)
+		}
+		realValues[i] = g
 	}
-	println(g)
 }
