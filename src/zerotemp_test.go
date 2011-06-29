@@ -58,5 +58,8 @@ func TestGc0(t *testing.T) {
 		solvedEnv = *cacheEnv
 	}
 	g, err := ZeroTempReGc0(solvedEnv, Vector2{0.1, 0.1}, 0.1)
+	if err != nil {
+		t.Fatal(err)
+	}
 	println(g)
 }
