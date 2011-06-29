@@ -171,27 +171,48 @@ func ZeroTempReGc0(env Environment, k Vector2, omega float64) (float64, os.Error
 	if err != nil {
 		return 0.0, err
 	}
-	omegaMax, omegaMin := imPart.Range()
+	omegaMin, omegaMax := imPart.Range()
 	// assume that Im(Gc0) is smooth near omegaPrime
 	integrand := func(omegaPrime float64) float64 {
-		return (1 / math.Pi) * imPart.At(omegaPrime) / (omegaPrime - omega)
+		if omegaMin <= omega || omegaMax >= omega {
+			println("about to check at ", omegaPrime)
+			return (1 / math.Pi) * imPart.At(omegaPrime) / (omegaPrime - omega)
+		}
+		return 0.0
 	}
-	singularLeft := omega - env.ReGc0dw
-	singularRight := omega + env.ReGc0dw
-	leftOmega := MakeRange(omegaMin, singularLeft, env.ReGc0Points)
-	rightOmega := MakeRange(singularRight, omegaMax, env.ReGc0Points)
-	leftIntegrand, rightIntegrand := make([]float64, env.ReGc0Points), make([]float64, env.ReGc0Points)
-	for i := 0; i < int(env.ReGc0Points); i++ {
-		leftIntegrand[i] = integrand(leftOmega[i])
-		rightIntegrand[i] = integrand(rightOmega[i])
+	// there will be a singularity
+	if omegaMin <= omega || omegaMax >= omega {
+		println("in sing")
+		singularLeft := omega - env.ReGc0dw
+		singularRight := omega + env.ReGc0dw
+		leftOmega := MakeRange(omegaMin, singularLeft, env.ReGc0Points)
+		rightOmega := MakeRange(singularRight, omegaMax, env.ReGc0Points)
+		leftIntegrand, rightIntegrand := make([]float64, env.ReGc0Points), make([]float64, env.ReGc0Points)
+		for i := 0; i < int(env.ReGc0Points); i++ {
+			leftIntegrand[i] = integrand(leftOmega[i])
+			rightIntegrand[i] = integrand(rightOmega[i])
+		}
+		leftIntegral, err := SplineIntegral(leftOmega, leftIntegrand, omegaMin, singularLeft)
+		if err != nil {
+			return 0.0, err
+		}
+		rightIntegral, err := SplineIntegral(rightOmega, rightIntegrand, singularRight, omegaMax)
+		if err != nil {
+			return 0.0, err
+		}
+		return leftIntegral + rightIntegral, nil
 	}
-	leftIntegral, err := SplineIntegral(leftOmega, leftIntegrand, omegaMin, singularLeft)
+	// otherwise: no singularity
+	println("in no_sing")
+	noSingPoints := 2 * env.ReGc0Points
+	omegaVals := MakeRange(omegaMin, omegaMax, noSingPoints)
+	integrandVal := make([]float64, noSingPoints)
+	for i := 0; i < int(noSingPoints); i++ {
+		integrandVal[i] = integrand(omegaVals[i])
+	}
+	integral, err := SplineIntegral(omegaVals, integrandVal, omegaMin, omegaMax)
 	if err != nil {
 		return 0.0, err
 	}
-	rightIntegral, err := SplineIntegral(rightOmega, rightIntegrand, singularRight, omegaMax)
-	if err != nil {
-		return 0.0, err
-	}
-	return leftIntegral + rightIntegral, nil
+	return integral, nil
 }
