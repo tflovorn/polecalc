@@ -117,11 +117,7 @@ func ZeroTempPairEnergy(env Environment, k Vector2) float64 {
 
 // Energy of a singlet (?)
 func ZeroTempOmega(env Environment, k Vector2) float64 {
-	k0_plus := Vector2{math.Pi / 2, math.Pi / 2}
-	k0_minus := k0_plus.Mult(-1)
-	// --- this is kind of sketchy: take smaller deviation from minimum ---
-	kDev := math.Fmin(k.Sub(k0_plus).NormSquared(), k.Sub(k0_minus).NormSquared())
-	return math.Sqrt(math.Pow(env.DeltaS, 2.0) + math.Pow(kDev*env.CS, 2.0))
+	return math.Sqrt(math.Pow(env.DeltaS, 2.0) + math.Pow(env.CS, 2.0)*(2-0.5*math.Pow(math.Sin(k.X) + math.Sin(k.Y), 2.0)))
 }
 
 // Fermi distribution at T = 0 is H(-x), where H is the Heaviside step function.
@@ -142,7 +138,7 @@ func ZeroTempImGc0(env Environment, k Vector2) ([]float64, []float64) {
 		return ZeroTempPairEnergy(env, k)
 	}
 	pairEnergyMax := Maximum(env.GridLength, maxWorker, env.NumProcs)
-	maxAbsOmega := env.Lambda + pairEnergyMax
+	maxAbsOmega := env.Lambda() + pairEnergyMax
 	omegaMin, omegaMax := -maxAbsOmega, maxAbsOmega
 	plusMinus := func(x, y float64) (float64, float64) {
 		return x + y, x - y
@@ -151,7 +147,7 @@ func ZeroTempImGc0(env Environment, k Vector2) ([]float64, []float64) {
 		omega_q := ZeroTempOmega(env, q)
 		E_h := ZeroTempPairEnergy(env, q)
 		omegas := []float64{omega_q - E_h, omega_q + E_h, -omega_q - E_h, -omega_q + E_h}
-		lambda_p, lambda_m := plusMinus(1, env.Lambda/ZeroTempOmega(env, q))
+		lambda_p, lambda_m := plusMinus(1, env.Lambda()/ZeroTempOmega(env, q))
 		xi_p, xi_m := plusMinus(1, Xi(env, q)/ZeroTempPairEnergy(env, q))
 		// 0 here is really bose function of omega_q = ZeroTempOmega(q)
 		// since omega_q > 0 and mu < 0, bose function result is 0

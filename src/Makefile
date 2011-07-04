@@ -6,6 +6,7 @@ bisection.go\
 bracket.go\
 cubicspline.go\
 environment.go\
+integrate.go\
 mesh2d.go\
 mesh_functions.go\
 mpljson.go\

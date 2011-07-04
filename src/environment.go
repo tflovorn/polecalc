@@ -7,6 +7,7 @@ import (
 	"bytes"
 	"io/ioutil"
 	"reflect"
+	"math"
 )
 
 // Holds all the necessary data for evaluating functions in the cuprate system
@@ -27,7 +28,6 @@ type Environment struct {
 	Tz, // z-direction hopping energy (|tz| < 0.3 or so)
 	Thp, // Diagonal (next-nearest-neighbor) hopping energy (similar range as tz)
 	X, // Doping / holon excess (0 < x < ~0.2)
-	Lambda, // spinon chemical potential
 	DeltaS, // spin gap
 	CS float64 // coefficient for k deviation in omega_q
 
@@ -43,6 +43,11 @@ type Environment struct {
 // The one-holon hopping energy Th is determined by Environment parameters
 func (env *Environment) Th() float64 {
 	return env.T0 * (1 - env.X)
+}
+
+// Spinon chemical potential
+func (env *Environment) Lambda() float64 {
+	return math.Sqrt(math.Pow(env.DeltaS, 2.0) + math.Pow(env.CS, 2.0))
 }
 
 // Set self-consistent parameters to the initial values as specified by the Environment

@@ -5,3 +5,6 @@ _test/
 _testmain.go
 _obj/
 commit
+*.png
+*.eps
+*.testignore

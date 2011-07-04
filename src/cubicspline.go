@@ -8,33 +8,9 @@ import (
 	"math"
 )
 
-// Integrate the cubic spline interpolation of y from x = left to x = right.  
-// xs is an ordered slice of equally spaced x values.
-// ys is a slice of the corresponding y values.
-// Assume left < right, left >= xs[0], and right <= xs[len(xs)-1].
-func SplineIntegral(xs, ys []float64, left, right float64) (float64, os.Error) {
-	if left > right {
-		left, right = right, left
-	}
-	s, err := NewCubicSpline(xs, ys)
-	if err != nil {
-		return 0.0, err
-	}
-	xMin, xMax := s.Range()
-	if left < xMin || right > xMax {
-		return 0.0, os.NewError("integral arguments out of bounds")
-	}
-	k, q := s.indexOf(left), s.indexOf(right)
-	first := s.antiDeriv(k, xs[k+1]) - s.antiDeriv(k, left)
-	middle, compensate := 0.0, 0.0
-	for i := k + 1; i < q; i++ {
-		integral := s.antiDeriv(i, xs[i+1]) - s.antiDeriv(i, xs[i])
-		middle, compensate = KahanSum(integral, middle, compensate)
-	}
-	last := s.antiDeriv(q, right) - s.antiDeriv(q, xs[q])
-	return first + middle + last, nil
-}
-
+// Cubic spline is defined by the set of functions s_i given on the intervals
+// between the values of xs: s_i(x) is defined on [xs[i],xs[i+1]).
+// s_i(x) = a[i](x-xs[i])^3 + b[i](x-xs[i])^2 + c[i](x-xs[i]) + d[i]
 type CubicSpline struct {
 	a, b, c, d []float64 // length n - 1
 	xs         []float64 // length n

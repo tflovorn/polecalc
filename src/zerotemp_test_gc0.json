@@ -12,7 +12,6 @@
 	"ImGc0Bins":256,
 	"ReGc0Points":128,
 	"ReGc0dw":1e-6,
-	"Lambda":4.0,
 	"DeltaS":1.0,
 	"CS":0.1
 }
