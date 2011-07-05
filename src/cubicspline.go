@@ -76,8 +76,14 @@ func (s *CubicSpline) indexOf(x float64) int {
 	xMin, xMax := s.Range()
 	// -1 to accomodate having one less interpolating function than the
 	// number of points
-	step := (xMax - xMin) / float64(len(s.xs)-1)
-	return int(math.Floor((x - xMin) / step))
+	numSplines := len(s.xs) - 1
+	step := (xMax - xMin) / float64(numSplines)
+	i := int(math.Floor((x - xMin) / step))
+	// final point does not jump to a new spline
+	if i == numSplines {
+		return i - 1
+	}
+	return i
 }
 
 // Find the cubic spline coefficients corresponding to the given points

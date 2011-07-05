@@ -117,7 +117,7 @@ func ZeroTempPairEnergy(env Environment, k Vector2) float64 {
 
 // Energy of a singlet (?)
 func ZeroTempOmega(env Environment, k Vector2) float64 {
-	return math.Sqrt(math.Pow(env.DeltaS, 2.0) + math.Pow(env.CS, 2.0)*(2-0.5*math.Pow(math.Sin(k.X) + math.Sin(k.Y), 2.0)))
+	return math.Sqrt(math.Pow(env.DeltaS, 2.0) + math.Pow(env.CS, 2.0)*(2-0.5*math.Pow(math.Sin(k.X)+math.Sin(k.Y), 2.0)))
 }
 
 // Fermi distribution at T = 0 is H(-x), where H is the Heaviside step function.

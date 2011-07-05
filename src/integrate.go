@@ -32,7 +32,7 @@ func SplineIntegral(xs, ys []float64, left, right float64) (float64, os.Error) {
 		middle, compensate = KahanSum(integral, middle, compensate)
 	}
 	last := s.antiDeriv(q, right) - s.antiDeriv(q, xs[q])
-	return sign*(first + middle + last), nil
+	return sign * (first + middle + last), nil
 }
 
 // Principal value integral of f(x) from x = a to x = b.  Assume there is a 
@@ -41,7 +41,7 @@ func SplineIntegral(xs, ys []float64, left, right float64) (float64, os.Error) {
 // spline on each side of the pole.
 func PvIntegral(f Func1D, a, b, w, eps float64, n uint) (float64, os.Error) {
 	// can't integrate if a boundary is on top of the pole
-	if math.Fabs(a - w) < eps || math.Fabs(b - w) < eps {
+	if math.Fabs(a-w) < eps || math.Fabs(b-w) < eps {
 		return 0.0, os.NewError("pv integral error: boundary too close to pole")
 	}
 	// if the bounds were given out of order, we need a minus sign later
@@ -53,7 +53,7 @@ func PvIntegral(f Func1D, a, b, w, eps float64, n uint) (float64, os.Error) {
 	// pole is fully inside integration region
 	if a <= w && w <= b {
 		// avoid the interval [wl, wr]
-		wl, wr := w - eps, w + eps
+		wl, wr := w-eps, w+eps
 		// left and right sets of x points
 		xls, xrs := MakeRange(a, wl, n), MakeRange(wr, b, n)
 		// left and right sets of y points
@@ -70,7 +70,7 @@ func PvIntegral(f Func1D, a, b, w, eps float64, n uint) (float64, os.Error) {
 		if err != nil {
 			return 0.0, err
 		}
-		return sign*(leftInt + rightInt), nil
+		return sign * (leftInt + rightInt), nil
 	}
 	// pole is fully outside the integration region
 	// x values take the entire range
@@ -85,5 +85,5 @@ func PvIntegral(f Func1D, a, b, w, eps float64, n uint) (float64, os.Error) {
 	if err != nil {
 		return 0.0, err
 	}
-	return sign*integral, nil
+	return sign * integral, nil
 }
