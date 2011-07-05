@@ -24,7 +24,8 @@ type Environment struct {
 
 	// system constant physical parameters
 	Alpha int8 // either -1 (d-wave) or +1 (s-wave)
-	T0,   // Overall energy scale (default = 1.0)
+	T,    // hopping energy for the physical electron
+	T0, // Overall energy scale (default = 1.0)
 	Tz, // z-direction hopping energy (|tz| < 0.3 or so)
 	Thp, // Diagonal (next-nearest-neighbor) hopping energy (similar range as tz)
 	X, // Doping / holon excess (0 < x < ~0.2)

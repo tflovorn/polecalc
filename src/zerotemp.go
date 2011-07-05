@@ -120,6 +120,11 @@ func ZeroTempOmega(env Environment, k Vector2) float64 {
 	return math.Sqrt(math.Pow(env.DeltaS, 2.0) + math.Pow(env.CS, 2.0)*(2-0.5*math.Pow(math.Sin(k.X)+math.Sin(k.Y), 2.0)))
 }
 
+// Energy of a physical electron
+func ZeroTempElectronEnergy(env Environment, k Vector2) float64 {
+	return -2.0 * env.T * (math.Cos(k.X) + math.Cos(k.Y))
+}
+
 // Fermi distribution at T = 0 is H(-x), where H is the Heaviside step function.
 // H(0) is taken to be 1.
 func ZeroTempFermi(energy float64) float64 {
@@ -171,7 +176,6 @@ func ZeroTempReGc0(env Environment, k Vector2, omega float64) (float64, os.Error
 	// assume that Im(Gc0) is smooth near omegaPrime
 	integrand := func(omegaPrime float64) float64 {
 		if omegaMin <= omegaPrime || omegaPrime <= omegaMax {
-			println(omegaMin, omegaMax, omegaPrime)
 			return (1 / math.Pi) * imPart.At(omegaPrime) / (omegaPrime - omega)
 		}
 		return 0.0
@@ -181,4 +185,58 @@ func ZeroTempReGc0(env Environment, k Vector2, omega float64) (float64, os.Error
 		return 0.0, err
 	}
 	return integral, nil
+}
+
+// --- full Green's function poles ---
+// find solutions to 1 - ElectronEnergy(k) * ReGc0(k,omega) = 0
+
+type ZeroTempGreenPoleEq struct {
+	K Vector2
+}
+
+type ZeroTempGreenArgs struct {
+	Env   Environment
+	Omega float64
+}
+
+func (eq ZeroTempGreenPoleEq) AbsError(args interface{}) float64 {
+	greenArgs := args.(ZeroTempGreenArgs)
+	env, omega := greenArgs.Env, greenArgs.Omega
+	ReGc0, err := ZeroTempReGc0(env, eq.K, omega)
+	if err != nil {
+		panic("error calculating ReGc0 searching for pole")
+	}
+	return 1 - ZeroTempElectronEnergy(env, eq.K)*ReGc0
+}
+
+func (eq ZeroTempGreenPoleEq) SetArguments(omega float64, args interface{}) interface{} {
+	env := args.(ZeroTempGreenArgs).Env
+	return ZeroTempGreenArgs{env, omega}
+}
+
+func (eq ZeroTempGreenPoleEq) Range(args interface{}) (float64, float64, os.Error) {
+	env := args.(ZeroTempGreenArgs).Env
+	return -10.0 * env.T, 10.0 * env.T, nil
+}
+
+// return all pole omegas at a given k
+func ZeroTempGreenPolePoint(env Environment, k Vector2) ([]float64, os.Error) {
+	// find brackets for all the poles
+	// lazy for now - only look at one solution
+	eq := ZeroTempGreenPoleEq{k}
+	initArgs := ZeroTempGreenArgs{env, 0.0}
+	solvedArgs, err := Solve(eq, initArgs)
+	if err != nil {
+		return nil, err
+	}
+	return []float64{solvedArgs.(ZeroTempGreenArgs).Omega}, nil
+}
+
+type GreenPole struct {
+	Kx, Ky, Omega float64
+}
+
+// scan the k space looking for poles
+func ZeroTempGreenPolePlane(env Environment) ([]GreenPole, os.Error) {
+	return nil, nil
 }

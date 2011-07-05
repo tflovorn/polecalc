@@ -45,7 +45,7 @@ func NewCubicSpline(xs, ys []float64) (*CubicSpline, os.Error) {
 func (s *CubicSpline) At(x float64) float64 {
 	xMin, xMax := s.Range()
 	eps := SplineExtrapolationDistance
-	if (xMin - x > eps) || (x - xMax > eps) {
+	if (xMin-x > eps) || (x-xMax > eps) {
 		panic("accessing cubic spline out of bounds")
 	}
 	i := s.indexOf(x)

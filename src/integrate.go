@@ -22,7 +22,7 @@ func SplineIntegral(xs, ys []float64, left, right float64) (float64, os.Error) {
 	}
 	xMin, xMax := s.Range()
 	eps := SplineExtrapolationDistance
-	if (xMin - left > eps) || (right - xMax > eps) {
+	if (xMin-left > eps) || (right-xMax > eps) {
 		return 0.0, os.NewError("SplineIntegral error: integral arguments out of bounds")
 	}
 	k, q := s.indexOf(left), s.indexOf(right)
