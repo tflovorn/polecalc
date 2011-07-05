@@ -58,7 +58,7 @@ func TestGc0(t *testing.T) {
 		solvedEnv = *cacheEnv
 	}
 	numOmega := uint(2048)
-	k := Vector2{math.Pi/2.0, math.Pi/2.0}
+	k := Vector2{math.Pi / 2.0, math.Pi / 2.0}
 	k = Vector2{0.1, 0.1}
 	imOmegas, imCalcValues := ZeroTempImGc0(solvedEnv, k)
 	imSpline, err := NewCubicSpline(imOmegas, imCalcValues)
@@ -103,4 +103,5 @@ func TestGc0(t *testing.T) {
 	}
 	println(poles[0])
 	println(imSpline.At(poles[0]))
+	println(ZeroTempGap(solvedEnv, k))
 }

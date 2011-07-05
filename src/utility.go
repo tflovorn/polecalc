@@ -34,6 +34,11 @@ func MachEpsFloat64() float64 {
 	return math.Pow(2.0, -53.0)
 }
 
+// Are x and y within MachEpsFloat64() of one another?
+func FuzzyEqual(x, y float64) bool {
+	return math.Fabs(x-y) < MachEpsFloat64()
+}
+
 // Convert string to byte slice
 func StringToBytes(str string) ([]byte, os.Error) {
 	reader := strings.NewReader(str)

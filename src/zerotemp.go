@@ -125,13 +125,22 @@ func ZeroTempElectronEnergy(env Environment, k Vector2) float64 {
 	return -2.0 * env.T * (math.Cos(k.X) + math.Cos(k.Y))
 }
 
-// Fermi distribution at T = 0 is H(-x), where H is the Heaviside step function.
+// Fermi distribution at T = 0 is H(-x), where H is a step function.
 // H(0) is taken to be 1.
 func ZeroTempFermi(energy float64) float64 {
 	if energy <= 0.0 {
 		return 1.0
 	}
 	return 0.0
+}
+
+// Find the minimium value of omega for which ImGc0 > 0.
+func ZeroTempGap(env Environment, k Vector2) float64 {
+	minWorker := func(q Vector2) float64 {
+		return math.Fabs(ZeroTempOmega(env, q) - ZeroTempPairEnergy(env, q.Sub(k)))
+	}
+	gap := Minimum(env.GridLength, minWorker, env.NumProcs)
+	return gap
 }
 
 // --- Green's function for the physical electron ---
