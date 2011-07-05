@@ -8,6 +8,8 @@ import (
 	"math"
 )
 
+const SplineExtrapolationDistance = 1e-14
+
 // Cubic spline is defined by the set of functions s_i given on the intervals
 // between the values of xs: s_i(x) is defined on [xs[i],xs[i+1]).
 // s_i(x) = a[i](x-xs[i])^3 + b[i](x-xs[i])^2 + c[i](x-xs[i]) + d[i]
@@ -42,7 +44,8 @@ func NewCubicSpline(xs, ys []float64) (*CubicSpline, os.Error) {
 // Will panic if x is outside the interpolation range
 func (s *CubicSpline) At(x float64) float64 {
 	xMin, xMax := s.Range()
-	if x < xMin || x > xMax {
+	eps := SplineExtrapolationDistance
+	if (xMin - x > eps) || (x - xMax > eps) {
 		panic("accessing cubic spline out of bounds")
 	}
 	i := s.indexOf(x)

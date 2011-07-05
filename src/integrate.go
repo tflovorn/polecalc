@@ -21,8 +21,9 @@ func SplineIntegral(xs, ys []float64, left, right float64) (float64, os.Error) {
 		return 0.0, err
 	}
 	xMin, xMax := s.Range()
-	if left < xMin || right > xMax {
-		return 0.0, os.NewError("integral arguments out of bounds")
+	eps := SplineExtrapolationDistance
+	if (xMin - left > eps) || (right - xMax > eps) {
+		return 0.0, os.NewError("SplineIntegral error: integral arguments out of bounds")
 	}
 	k, q := s.indexOf(left), s.indexOf(right)
 	first := s.antiDeriv(k, xs[k+1]) - s.antiDeriv(k, left)
@@ -42,7 +43,7 @@ func SplineIntegral(xs, ys []float64, left, right float64) (float64, os.Error) {
 func PvIntegral(f Func1D, a, b, w, eps float64, n uint) (float64, os.Error) {
 	// can't integrate if a boundary is on top of the pole
 	if math.Fabs(a-w) < eps || math.Fabs(b-w) < eps {
-		return 0.0, os.NewError("pv integral error: boundary too close to pole")
+		return 0.0, os.NewError("PvIntegral error: boundary too close to pole")
 	}
 	// if the bounds were given out of order, we need a minus sign later
 	sign := 1.0

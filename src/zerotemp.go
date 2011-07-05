@@ -170,41 +170,13 @@ func ZeroTempReGc0(env Environment, k Vector2, omega float64) (float64, os.Error
 	omegaMin, omegaMax := imPart.Range()
 	// assume that Im(Gc0) is smooth near omegaPrime
 	integrand := func(omegaPrime float64) float64 {
-		if omegaMin <= omega || omega <= omegaMax {
+		if omegaMin <= omegaPrime || omegaPrime <= omegaMax {
+			println(omegaMin, omegaMax, omegaPrime)
 			return (1 / math.Pi) * imPart.At(omegaPrime) / (omegaPrime - omega)
 		}
 		return 0.0
 	}
-	eps := 1e-9 // arbitrary small number to ensure we don't go out of interpolation bounds
-	// there will be a singularity
-	if omegaMin <= omega && omega <= omegaMax {
-		singularLeft := omega - env.ReGc0dw
-		singularRight := omega + env.ReGc0dw
-		leftOmega := MakeRange(omegaMin+eps, singularLeft, env.ReGc0Points)
-		rightOmega := MakeRange(singularRight, omegaMax-eps, env.ReGc0Points)
-		leftIntegrand, rightIntegrand := make([]float64, env.ReGc0Points), make([]float64, env.ReGc0Points)
-		for i := 0; i < int(env.ReGc0Points); i++ {
-			leftIntegrand[i] = integrand(leftOmega[i])
-			rightIntegrand[i] = integrand(rightOmega[i])
-		}
-		leftIntegral, err := SplineIntegral(leftOmega, leftIntegrand, omegaMin+2*eps, singularLeft-eps)
-		if err != nil {
-			return 0.0, err
-		}
-		rightIntegral, err := SplineIntegral(rightOmega, rightIntegrand, singularRight+eps, omegaMax-2*eps)
-		if err != nil {
-			return 0.0, err
-		}
-		return leftIntegral + rightIntegral, nil
-	}
-	// otherwise: no singularity
-	noSingPoints := 2 * env.ReGc0Points
-	omegaVals := MakeRange(omegaMin+eps, omegaMax-eps, noSingPoints)
-	integrandVal := make([]float64, noSingPoints)
-	for i := 0; i < int(noSingPoints); i++ {
-		integrandVal[i] = integrand(omegaVals[i])
-	}
-	integral, err := SplineIntegral(omegaVals, integrandVal, omegaMin+2*eps, omegaMax-2*eps)
+	integral, err := PvIntegral(integrand, omegaMin, omegaMax, omega, env.ReGc0dw, env.ReGc0Points)
 	if err != nil {
 		return 0.0, err
 	}
