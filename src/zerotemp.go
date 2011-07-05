@@ -234,11 +234,16 @@ func ZeroTempGreenPolePoint(env Environment, k Vector2) ([]float64, os.Error) {
 	// lazy for now - only look at one solution
 	eq := ZeroTempGreenPoleEq{k}
 	initArgs := ZeroTempGreenArgs{env, 0.0}
-	solvedArgs, err := Solve(eq, initArgs)
+	solvedArgs, err := MultiSolve(eq, initArgs)
 	if err != nil {
 		return nil, err
 	}
-	return []float64{solvedArgs.(ZeroTempGreenArgs).Omega}, nil
+	solutions := []float64{}
+	for _, args := range solvedArgs {
+		omega := args.(ZeroTempGreenArgs).Omega
+		solutions = append(solutions, omega)
+	}
+	return solutions, nil
 }
 
 type GreenPole struct {

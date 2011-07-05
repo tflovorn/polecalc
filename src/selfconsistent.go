@@ -37,6 +37,32 @@ func Solve(eq SelfConsistentEquation, args interface{}) (interface{}, os.Error) 
 	return args, nil
 }
 
+// Return a slice of interface{}'s which solve eq
+func MultiSolve(eq SelfConsistentEquation, args interface{}) ([]interface{}, os.Error) {
+	eqError := func(value float64) float64 {
+		args = eq.SetArguments(value, args)
+		return eq.AbsError(args)
+	}
+	leftEdge, rightEdge, err := eq.Range(args)
+	if err != nil {
+		return nil, err
+	}
+	brackets, err := MultiBracket(eqError, leftEdge, rightEdge)
+	if err != nil {
+		return nil, err
+	}
+	solutions := []interface{}{}
+	for _, bracket := range brackets {
+		left, right := bracket[0], bracket[1]
+		solution, err := BisectionFullPrecision(eqError, left, right)
+		if err != nil {
+			return solutions, err
+		}
+		solutions = append(solutions, eq.SetArguments(solution, args))
+	}
+	return solutions, nil
+}
+
 // A group of self-consistent equations which may be coupled and must all be
 // solved for the group to be considered solved.
 type SelfConsistentSystem struct {

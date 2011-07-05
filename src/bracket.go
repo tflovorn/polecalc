@@ -9,7 +9,7 @@ const InitialBracketNumber uint = 32
 const MaxBracketNumber uint = 8192 // 8 iterations from 32 (32 * 2^8)
 
 // Find all pairs of points which bracket roots of f between left and right.
-func MultiBracket(f Func1D, left, right float64, bracketNum uint) ([][]float64, os.Error) {
+func MultiBracket(f Func1D, left, right float64) ([][]float64, os.Error) {
 	return bracketHelper(f, left, right, InitialBracketNumber, -1)
 }
 
@@ -33,7 +33,7 @@ func bracketHelper(f Func1D, left, right float64, bracketNum uint, maxBrackets i
 		left, right = right, left
 	}
 	xs := MakeRange(left, right, bracketNum)
-	scale := xs[1]-xs[0]
+	scale := xs[1] - xs[0]
 	brackets := [][]float64{}
 	for i, _ := range xs {
 		// only get as many brackets as requested
@@ -60,8 +60,11 @@ func bracketHelper(f Func1D, left, right float64, bracketNum uint, maxBrackets i
 		// too many divisions
 		return nil, os.NewError("cannot find bracket")
 	}
-	// try again with smaller divisions
-	return bracketHelper(f, left, right, bracketNum*2, maxBrackets)
+	// not enough brackets - try again with smaller divisions
+	if len(brackets) == 0 {
+		return bracketHelper(f, left, right, bracketNum*2, maxBrackets)
+	}
+	return brackets, nil
 }
 
 // If x and y don't have the same sign, we know they bracket a root.
