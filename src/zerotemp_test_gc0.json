@@ -1,7 +1,7 @@
 {
 	"GridLength": 64,
-	"InitD1": 0.1,
-	"InitMu": 0.1,
+	"InitD1": 0.05,
+	"InitMu": -0.1,
 	"InitF0": 0.1,
 	"Alpha": -1,
 	"T0": 1.0,
@@ -10,8 +10,9 @@
 	"X": 0.1,
 	"NumProcs": 1,
 	"ImGc0Bins":256,
-	"ReGc0Points":128,
-	"ReGc0dw":1e-6,
+	"ReGc0Points":256,
+	"ReGc0dw":1e-9,
 	"DeltaS":1.0,
-	"CS":0.1
+	"CS":0.1,
+	"T":4.0
 }

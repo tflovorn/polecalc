@@ -4,6 +4,7 @@ import (
 	"testing"
 	"reflect"
 	"flag"
+	"math"
 )
 
 var cached *bool = flag.Bool("gc_cache", false, "used cached Environment for TestGc0")
@@ -56,8 +57,9 @@ func TestGc0(t *testing.T) {
 		}
 		solvedEnv = *cacheEnv
 	}
-	numOmega := uint(256)
-	k := Vector2{0.1, 0.1}
+	numOmega := uint(2048)
+	k := Vector2{math.Pi/2.0, math.Pi/2.0}
+	k = Vector2{0.1, 0.1}
 	imOmegas, imCalcValues := ZeroTempImGc0(solvedEnv, k)
 	imSpline, err := NewCubicSpline(imOmegas, imCalcValues)
 	if err != nil {
@@ -95,4 +97,10 @@ func TestGc0(t *testing.T) {
 	imGraph.AddSeries(map[string]string{"label": "im_gc0"}, imData)
 	MakePlot(reGraph, rePath)
 	MakePlot(imGraph, imPath)
+	poles, err := ZeroTempGreenPolePoint(solvedEnv, k)
+	if err != nil {
+		t.Fatal(err)
+	}
+	println(poles[0])
+	println(imSpline.At(poles[0]))
 }

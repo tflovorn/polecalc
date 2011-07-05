@@ -11,7 +11,7 @@ const MaxBracketNumber uint = 8192 // 8 iterations from 32 (32 * 2^8)
 // Find a pair of points which bracket a root of f between left and right.
 func FindBracket(f Func1D, left, right float64) (float64, float64, os.Error) {
 	if left == right {
-		return 0.0, 0.0, os.NewError("must give two distinct points to find bracket")
+		return 0.0, 0.0, os.NewError("bracket error: must give two distinct points to find bracket")
 	}
 	if left > right {
 		left, right = right, left
