@@ -6,7 +6,7 @@ import "os"
 // Number of steps to take in the first attempt to find a bracket.
 const InitialBracketNumber uint = 32
 // If using more steps than this to find a bracket, stop.
-const MaxBracketNumber uint = 8192 // 8 iterations from 32 (32 * 2^8)
+const MaxBracketNumber uint = 256 // 4 iterations from 32 (32 * 2^4)
 
 // Find all pairs of points which bracket roots of f between left and right.
 func MultiBracket(f Func1D, left, right float64) ([][]float64, os.Error) {
