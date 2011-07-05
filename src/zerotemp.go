@@ -3,7 +3,11 @@ package polecalc
 import (
 	"math"
 	"os"
+	"reflect"
 )
+
+var imGc0CacheEnv = make([]Environment, 0)
+var imGc0CacheK = make(map[int]map[float64]map[float64]*CubicSpline)
 
 // Returns the system of equations needed to solve the system at T = 0
 func NewZeroTempSystem(tolerances []float64) *SelfConsistentSystem {
@@ -145,6 +149,42 @@ func ZeroTempGap(env Environment, k Vector2) float64 {
 
 // --- Green's function for the physical electron ---
 
+func cachedEnvIndex(env Environment) int {
+	for i, cacheEnv := range imGc0CacheEnv {
+		if reflect.DeepEqual(env, cacheEnv) {
+			return i
+		}
+	}
+	return -1
+}
+
+func cachedImGc0(env Environment, k Vector2) (*CubicSpline, bool) {
+	i := cachedEnvIndex(env)
+	if i == -1 {
+		return nil, false
+	}
+	spline, ok := imGc0CacheK[i][k.X][k.Y]
+	return spline, ok
+}
+
+func addToCacheImGc0(env Environment, k Vector2, spl *CubicSpline) {
+	i := cachedEnvIndex(env)
+	if i == -1 {
+		// env not encountered yet
+		imGc0CacheEnv = append(imGc0CacheEnv, env)
+		i = len(imGc0CacheEnv)-1
+		imGc0CacheK[i] = make(map[float64]map[float64]*CubicSpline)
+	}
+	if xCache, ok := imGc0CacheK[i][k.X]; ok {
+		// have seen this X before
+		xCache[k.Y] = spl
+	} else {
+		// new X
+		imGc0CacheK[i][k.X] = make(map[float64]*CubicSpline)
+		imGc0CacheK[i][k.X][k.Y] = spl
+	}
+}
+
 // imaginary part - values for all omega are calculated simultaneously, so
 // return two slices of floats.  first is omega values, second is coefficients
 func ZeroTempImGc0(env Environment, k Vector2) ([]float64, []float64) {
@@ -176,10 +216,17 @@ func ZeroTempImGc0(env Environment, k Vector2) ([]float64, []float64) {
 }
 
 func ZeroTempReGc0(env Environment, k Vector2, omega float64) (float64, os.Error) {
-	imPartOmegaVals, imPartFuncVals := ZeroTempImGc0(env, k)
-	imPart, err := NewCubicSpline(imPartOmegaVals, imPartFuncVals)
-	if err != nil {
-		return 0.0, err
+	var imPart *CubicSpline
+	if cache, ok := cachedImGc0(env, k); ok {
+		imPart = cache
+	} else {
+		var err os.Error
+		imPartOmegaVals, imPartFuncVals := ZeroTempImGc0(env, k)
+		imPart, err = NewCubicSpline(imPartOmegaVals, imPartFuncVals)
+		if err != nil {
+			return 0.0, err
+		}
+		addToCacheImGc0(env, k, imPart)
 	}
 	omegaMin, omegaMax := imPart.Range()
 	// assume that Im(Gc0) is smooth near omegaPrime
