@@ -172,7 +172,7 @@ func addToCacheImGc0(env Environment, k Vector2, spl *CubicSpline) {
 	if i == -1 {
 		// env not encountered yet
 		imGc0CacheEnv = append(imGc0CacheEnv, env)
-		i = len(imGc0CacheEnv)-1
+		i = len(imGc0CacheEnv) - 1
 		imGc0CacheK[i] = make(map[float64]map[float64]*CubicSpline)
 	}
 	if xCache, ok := imGc0CacheK[i][k.X]; ok {
