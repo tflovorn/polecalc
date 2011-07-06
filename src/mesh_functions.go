@@ -192,7 +192,7 @@ func NewDeltaBinner(deltaTerms DeltaTermsFunc, binStart, binStop float64, numBin
 func DoGridListen(pointsPerSide uint32, listener GridListener) interface{} {
 	listener = listener.initialize()
 	sqrtN := uint64(pointsPerSide)
-	N := sqrtN*sqrtN
+	N := sqrtN * sqrtN
 	for i := uint64(0); i < N; i++ {
 		listener = listener.grab(SquareAt(i, pointsPerSide))
 	}

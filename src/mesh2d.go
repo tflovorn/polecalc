@@ -19,9 +19,9 @@ func SquareAt(i uint64, L uint32) Vector2 {
 	step := length / float64(L)
 	// transform 1d index to 2d coordinate indices
 	ny := uint32(math.Floor(float64(i) / float64(L)))
-	nx := uint32(i) - ny * L
+	nx := uint32(i) - ny*L
 	// get coordinates
-	x := start + float64(nx) * step
-	y := start + float64(ny) * step
+	x := start + float64(nx)*step
+	y := start + float64(ny)*step
 	return Vector2{x, y}
 }
