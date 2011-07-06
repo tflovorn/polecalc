@@ -27,7 +27,7 @@ func ZeroTempD1AbsError(env Environment) float64 {
 		sx, sy := math.Sin(k.X), math.Sin(k.Y)
 		return -0.5 * (1 - Xi(env, k)/ZeroTempPairEnergy(env, k)) * sx * sy
 	}
-	return env.D1 - Average(env.GridLength, worker, env.NumProcs)
+	return env.D1 - Average(env.GridLength, worker)
 }
 
 type ZeroTempD1Equation struct{}
@@ -55,7 +55,7 @@ func ZeroTempMuAbsError(env Environment) float64 {
 	worker := func(k Vector2) float64 {
 		return 0.5 * (1 - Xi(env, k)/ZeroTempPairEnergy(env, k))
 	}
-	return env.X - Average(env.GridLength, worker, env.NumProcs)
+	return env.X - Average(env.GridLength, worker)
 }
 
 type ZeroTempMuEquation struct{}
@@ -85,7 +85,7 @@ func ZeroTempF0AbsError(env Environment) float64 {
 		sinPart := math.Sin(k.X) + float64(env.Alpha)*math.Sin(k.Y)
 		return sinPart * sinPart / ZeroTempPairEnergy(env, k)
 	}
-	return 1/(env.T0+env.Tz) - Average(env.GridLength, worker, env.NumProcs)
+	return 1/(env.T0+env.Tz) - Average(env.GridLength, worker)
 }
 
 type ZeroTempF0Equation struct{}
@@ -143,7 +143,7 @@ func ZeroTempGap(env Environment, k Vector2) float64 {
 	minWorker := func(q Vector2) float64 {
 		return math.Fabs(ZeroTempOmega(env, q) - ZeroTempPairEnergy(env, q.Sub(k)))
 	}
-	gap := Minimum(env.GridLength, minWorker, env.NumProcs)
+	gap := Minimum(env.GridLength, minWorker)
 	return gap
 }
 
@@ -191,7 +191,7 @@ func ZeroTempImGc0(env Environment, k Vector2) ([]float64, []float64) {
 	maxWorker := func(k Vector2) float64 {
 		return ZeroTempPairEnergy(env, k)
 	}
-	pairEnergyMax := Maximum(env.GridLength, maxWorker, env.NumProcs)
+	pairEnergyMax := Maximum(env.GridLength, maxWorker)
 	maxAbsOmega := env.Lambda() + pairEnergyMax
 	omegaMin, omegaMax := -maxAbsOmega, maxAbsOmega
 	plusMinus := func(x, y float64) (float64, float64) {
@@ -210,7 +210,7 @@ func ZeroTempImGc0(env Environment, k Vector2) ([]float64, []float64) {
 		return omegas, coeffs
 	}
 	binner := NewDeltaBinner(deltaTerms, omegaMin, omegaMax, env.ImGc0Bins)
-	result := DeltaBin(env.GridLength, binner, env.NumProcs)
+	result := DeltaBin(env.GridLength, binner)
 	omegas := binner.BinVarValues()
 	return omegas, result
 }

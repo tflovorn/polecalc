@@ -18,7 +18,7 @@ func EpsilonMin(env Environment) float64 {
 	worker := func(k Vector2) float64 {
 		return EpsilonBar(env, k)
 	}
-	return Minimum(env.GridLength, worker, env.NumProcs)
+	return Minimum(env.GridLength, worker)
 }
 
 // Effective hopping energy (epsilon - mu).  Minimum is -mu.

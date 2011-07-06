@@ -189,22 +189,12 @@ func NewDeltaBinner(deltaTerms DeltaTermsFunc, binStart, binStop float64, numBin
 }
 
 // -- utility functions --
-// assumes numWorkers > 0
-func DoGridListen(pointsPerSide uint32, numWorkers uint16, listener GridListener) interface{} {
-	cmesh := Square(pointsPerSide)
-	done := make(chan bool)
+func DoGridListen(pointsPerSide uint32, listener GridListener) interface{} {
 	listener = listener.initialize()
-	var i uint16 = 0
-	for i = 0; i < numWorkers; i++ {
-		go func() {
-			for point, ok := <-cmesh; ok; point, ok = <-cmesh {
-				listener = listener.grab(point)
-			}
-			done <- true
-		}()
-	}
-	for doneCount := 0; doneCount < int(numWorkers); doneCount++ {
-		<-done
+	sqrtN := uint64(pointsPerSide)
+	N := sqrtN*sqrtN
+	for i := uint64(0); i < N; i++ {
+		listener = listener.grab(SquareAt(i, pointsPerSide))
 	}
 	return listener.result()
 }
@@ -214,23 +204,23 @@ func DoGridListen(pointsPerSide uint32, numWorkers uint16, listener GridListener
 // pointsPerSide is uint32 so that accum.points will fit in a uint64.
 // numWorkers is uint16 to avoid spawning a ridiculous number of processes.
 // Consumer is defined in utility.go
-func Average(pointsPerSide uint32, worker Consumer, numWorkers uint16) float64 {
+func Average(pointsPerSide uint32, worker Consumer) float64 {
 	accum := NewAccumulator(worker)
-	return DoGridListen(pointsPerSide, numWorkers, *accum).(float64)
+	return DoGridListen(pointsPerSide, *accum).(float64)
 }
 
-func Minimum(pointsPerSide uint32, worker Consumer, numWorkers uint16) float64 {
+func Minimum(pointsPerSide uint32, worker Consumer) float64 {
 	minData := NewMinimumData(worker)
-	return DoGridListen(pointsPerSide, numWorkers, *minData).(float64)
+	return DoGridListen(pointsPerSide, *minData).(float64)
 }
 
-func Maximum(pointsPerSide uint32, worker Consumer, numWorkers uint16) float64 {
+func Maximum(pointsPerSide uint32, worker Consumer) float64 {
 	maxData := NewMaximumData(worker)
-	return DoGridListen(pointsPerSide, numWorkers, *maxData).(float64)
+	return DoGridListen(pointsPerSide, *maxData).(float64)
 }
 
 // Instead of taking a worker directly, this functions takes a *DeltaBinner
 // (to avoid passing in all the params for DeltaBinner)
-func DeltaBin(pointsPerSide uint32, deltaTerms *DeltaBinner, numWorkers uint16) []float64 {
-	return DoGridListen(pointsPerSide, numWorkers, deltaTerms).([]float64)
+func DeltaBin(pointsPerSide uint32, deltaTerms *DeltaBinner) []float64 {
+	return DoGridListen(pointsPerSide, deltaTerms).([]float64)
 }

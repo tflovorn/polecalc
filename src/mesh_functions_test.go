@@ -12,10 +12,10 @@ func TestSinSin(t *testing.T) {
 	worker := func(k Vector2) float64 {
 		return math.Sin(k.X) * math.Sin(k.Y)
 	}
-	if avg := Average(128, worker, 1); math.IsNaN(avg) || avg > MachEpsFloat64() {
+	if avg := Average(128, worker); math.IsNaN(avg) || avg > MachEpsFloat64() {
 		t.Fatalf("average of sin(kx)*sin(ky) incorrect (got %f)", avg)
 	}
-	if min := Minimum(128, worker, 1); math.IsNaN(min) || (min+1) > 1e-9 {
+	if min := Minimum(128, worker); math.IsNaN(min) || (min+1) > 1e-9 {
 		t.Fatalf("minimum of sin(kx)*sin(ky) incorrect (got %f)", min)
 	}
 }
@@ -30,7 +30,7 @@ func TestTwoDeltas(t *testing.T) {
 		return omegas, coeffs
 	}
 	binner := NewDeltaBinner(deltaTerms, 0.0, 15.0, 64)
-	result := DeltaBin(pointsPerSide, binner, 1)
+	result := DeltaBin(pointsPerSide, binner)
 	expected := 1.0
 	for _, point := range deltaPoints {
 		index := binner.BinVarToIndex(point)

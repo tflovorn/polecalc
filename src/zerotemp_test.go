@@ -11,7 +11,7 @@ import (
 var cached *bool = flag.Bool("gc_cache", false, "used cached Environment for TestGc0")
 
 func TestKnownZeroTempSystem(t *testing.T) {
-	envStr := "{\"GridLength\":8,\"NumProcs\":1,\"InitD1\":0.1,\"InitMu\":0.1,\"InitF0\":0.1,\"Alpha\":-1,\"T0\":1,\"Tz\":0.1,\"Thp\":0.1,\"X\":0.1,\"D1\":0.05777149373506872,\"Mu\":-0.18330570279347036,\"F0\":0.12945949461029926,\"EpsilonMin\":-1.8}"
+	envStr := "{\"GridLength\":8,\"InitD1\":0.1,\"InitMu\":0.1,\"InitF0\":0.1,\"Alpha\":-1,\"T0\":1,\"Tz\":0.1,\"Thp\":0.1,\"X\":0.1,\"D1\":0.05777149373506872,\"Mu\":-0.18330570279347036,\"F0\":0.12945949461029926,\"EpsilonMin\":-1.8}"
 	expectedEnv, err := EnvironmentFromString(envStr)
 	if err != nil {
 		t.Fatal(err)
@@ -63,10 +63,10 @@ func TestGc0(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(poles) != 2 {
+	if len(poles) != 4 {
 		t.Fatal("did not get expected number of poles")
 	}
-	expected := []string{"-3.8317472896268328", "7.733208268639979"}
+	expected := []string{"-3.8862440783169987", "3.86016952787911", "3.9111002349865496", "7.560058812941273"}
 	for i, p := range poles {
 		if fmt.Sprintf("%v", p) != expected[i] {
 			t.Fatal("did not get expected pole value")

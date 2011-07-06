@@ -1,31 +1,27 @@
 package polecalc
 
-import "math"
+import (
+	"math"
+)
 
-// Return two channels:
-// The first contains points on a square grid with boundaries (-Pi, Pi) x (-Pi, Pi).
-// (this is the first Brillouin zone of a square lattice)
-// When all points have been consumed, the value true is passed on the second channel.
-func Square(pointsPerSide uint32) chan Vector2 {
-	cmesh := make(chan Vector2)
-	go helpSquare(cmesh, pointsPerSide)
-	return cmesh
-}
-
-// Do the work of generating the square mesh.
-func helpSquare(cmesh chan Vector2, pointsPerSide uint32) {
-	length := 2 * math.Pi
-	step := length / float64(pointsPerSide)
-	begin := -math.Pi
-	end := math.Pi - step
-	x, y := begin, begin
-	for y <= end {
-		for x <= end {
-			cmesh <- Vector2{x, y}
-			x += step
-		}
-		y += step
-		x = begin
+// Return a square mesh coordinate corresponding to the index i.
+// i=0 corresponds to (-pi, -pi); i=L-1 is (pi-step, -pi);
+// i=L is (-pi, -pi+step); i=L^2-1 is (pi-step, pi-step)
+func SquareAt(i uint64, L uint32) Vector2 {
+	if i < 0 || i >= uint64(math.Pow(float64(L), 2.0)) {
+		// panic here instead of returning an error since we will call
+		// this function pretty often - presumably only returning one
+		// variable is better for performance
+		panic("invalid index for square mesh")
 	}
-	close(cmesh)
+	start, stop := -math.Pi, math.Pi
+	length := stop - start
+	step := length / float64(L)
+	// transform 1d index to 2d coordinate indices
+	ny := uint32(math.Floor(float64(i) / float64(L)))
+	nx := uint32(i) - ny * L
+	// get coordinates
+	x := start + float64(nx) * step
+	y := start + float64(ny) * step
+	return Vector2{x, y}
 }

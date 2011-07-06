@@ -1,1 +1,1 @@
-{"GridLength":64,"ImGc0Bins":256,"ReGc0Points":256,"ReGc0dw":1e-09,"NumProcs":1,"InitD1":0.05,"InitMu":-0.1,"InitF0":0.1,"Alpha":-1,"T":4,"T0":1,"Tz":0.1,"Thp":0.1,"X":0.1,"DeltaS":1,"CS":0.1,"D1":0.053352856523888964,"Mu":-0.23959545685009592,"F0":0.13260822681081508,"EpsilonMin":-1.8}
+{"GridLength":64,"ImGc0Bins":256,"ReGc0Points":256,"ReGc0dw":1e-09,"InitD1":0.05,"InitMu":-0.1,"InitF0":0.1,"Alpha":-1,"T":4,"T0":1,"Tz":0.1,"Thp":0.1,"X":0.1,"DeltaS":1,"CS":0.1,"D1":0.052618992392930136,"Mu":-0.21964827353707628,"F0":0.13093957516714283,"EpsilonMin":-1.8}

@@ -1,6 +1,9 @@
 package polecalc
 
-import "math"
+import (
+	"math"
+	"fmt"
+)
 
 type Vector2 struct {
 	X, Y float64
@@ -28,4 +31,8 @@ func (v Vector2) Norm() float64 {
 
 func (v Vector2) NormSquared() float64 {
 	return v.Dot(v)
+}
+
+func (v Vector2) String() string {
+	return fmt.Sprintf("(%f, %f)", v.X, v.Y)
 }

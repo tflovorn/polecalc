@@ -17,7 +17,6 @@ type Environment struct {
 	ImGc0Bins   uint    // number of bins to use when calculating the imaginary part of the electron Green's function
 	ReGc0Points uint    // number of points to use on each side of the 1/x singularity when calculating ReGc0
 	ReGc0dw     float64 // distance away from the singularity to step when calculating ReGc0
-	NumProcs    uint16  // number of processes to use for mesh functions
 	InitD1,     // initial values for self-consistent parameters
 	InitMu,
 	InitF0 float64
@@ -53,10 +52,6 @@ func (env *Environment) Lambda() float64 {
 
 // Set self-consistent parameters to the initial values as specified by the Environment
 func (env *Environment) Initialize() {
-	// hard-coded defaults
-	if env.NumProcs <= 0 {
-		env.NumProcs = 1
-	}
 	// specified defaults
 	env.D1 = env.InitD1
 	env.Mu = env.InitMu

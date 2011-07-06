@@ -15,7 +15,7 @@ func TestEpsilonMin(t *testing.T) {
 	worker := func(k Vector2) float64 {
 		return Epsilon(*env, k)
 	}
-	min := Minimum(env.GridLength, worker, env.NumProcs)
+	min := Minimum(env.GridLength, worker)
 	if math.Fabs(min) > MachEpsFloat64() {
 		t.Fatalf("minimum of Epsilon too large (%f)", min)
 	}
