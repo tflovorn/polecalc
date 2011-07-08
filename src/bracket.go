@@ -2,6 +2,8 @@ package polecalc
 
 import "os"
 
+var ErrorNoBracket string = "cannot find bracket"
+
 // (should probably set these constants through a configuration method)
 // Number of steps to take in the first attempt to find a bracket.
 const InitialBracketNumber uint = 32
@@ -58,7 +60,7 @@ func bracketHelper(f Func1D, left, right float64, bracketNum uint, maxBrackets i
 	// overshot bounds if without finding bracket if we get here
 	if bracketNum >= MaxBracketNumber {
 		// too many divisions
-		return nil, os.NewError("cannot find bracket")
+		return nil, os.NewError(ErrorNoBracket)
 	}
 	// not enough brackets - try again with smaller divisions
 	if len(brackets) == 0 {

@@ -4,6 +4,7 @@ import (
 	"math"
 	"os"
 	"reflect"
+	"fmt"
 )
 
 var imGc0CacheEnv = make([]Environment, 0)
@@ -163,7 +164,11 @@ func cachedImGc0(env Environment, k Vector2) (*CubicSpline, bool) {
 	if i == -1 {
 		return nil, false
 	}
-	spline, ok := imGc0CacheK[i][k.X][k.Y]
+	cacheX, ok := imGc0CacheK[i][k.X]
+	if !ok {
+		return nil, false
+	}
+	spline, ok := cacheX[k.Y]
 	return spline, ok
 }
 
@@ -294,10 +299,57 @@ func ZeroTempGreenPolePoint(env Environment, k Vector2) ([]float64, os.Error) {
 }
 
 type GreenPole struct {
-	Kx, Ky, Omega float64
+	K     Vector2
+	Omega float64
 }
 
-// scan the k space looking for poles
-func ZeroTempGreenPolePlane(env Environment) ([]GreenPole, os.Error) {
-	return nil, nil
+func (gp GreenPole) String() string {
+	return fmt.Sprintf("k: %v; omega: %f", gp.K, gp.Omega)
+}
+
+// scan the k space looking for poles; return all those found
+func ZeroTempGreenPolePlane(env Environment, pointsPerSide uint32) ([]GreenPole, os.Error) {
+	sqrtN := uint64(pointsPerSide)
+	N := sqrtN * sqrtN
+	poles := []GreenPole{}
+	for i := uint64(0); i < N; i++ {
+		k := SquareAt(i, pointsPerSide)
+		var err os.Error
+		poles, err = capturePoles(env, k, poles)
+		if err != nil {
+			return poles, err
+		}
+	}
+	return poles, nil
+}
+
+func ZeroTempGreenPoleCurve(env Environment, poleCurve func(float64) Vector2, numPoints uint) ([]GreenPole, os.Error) {
+	xValues := MakeRange(0.0, 1.0, numPoints)
+	poles := []GreenPole{}
+	for _, x := range xValues {
+		k := poleCurve(x)
+		var err os.Error
+		poles, err = capturePoles(env, k, poles)
+		if err != nil {
+			return poles, err
+		}
+	}
+	return poles, nil
+}
+
+func capturePoles(env Environment, k Vector2, poles []GreenPole) ([]GreenPole, os.Error) {
+	kPoles, err := ZeroTempGreenPolePoint(env, k)
+	if err != nil {
+		if err.String() == ErrorNoBracket {
+			println("bracket error at k = ", k.String())
+			return poles, nil
+		}
+		return poles, err
+	} else {
+		for _, p := range kPoles {
+			println(k.String(), p)
+			poles = append(poles, GreenPole{k, p})
+		}
+	}
+	return poles, err
 }

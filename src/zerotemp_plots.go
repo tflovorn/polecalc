@@ -42,3 +42,36 @@ func ZeroTempPlotGc0(env Environment, k Vector2, numOmega uint, outputPath strin
 	MakePlot(imGraph, imPath)
 	return nil
 }
+
+func ZeroTempPlotPolePlane(env Environment, outputPath string) os.Error {
+	polePlane, err := ZeroTempGreenPolePlane(env, 128)
+	if err != nil {
+		return err
+	}
+	graphPoleData(polePlane, outputPath)
+	return nil
+}
+
+// Plot the line of poles specified by poleCurve, which takes a float value from
+// 0 to 1 and returns a Vector2 corresponding to that value
+func ZeroTempPlotPoleCurve(env Environment, poleCurve func(float64) Vector2, numPoints uint, outputPath string) os.Error {
+	polePoints, err := ZeroTempGreenPoleCurve(env, poleCurve, numPoints)
+	if err != nil {
+		return err
+	}
+	graphPoleData(polePoints, outputPath)
+	return nil
+}
+
+func graphPoleData(poles []GreenPole, outputPath string) {
+	poleData := [][]float64{}
+	println(len(poles))
+	for _, gp := range poles {
+		k := gp.K
+		poleData = append(poleData, []float64{k.X, k.Y})
+	}
+	poleGraph := NewGraph()
+	poleGraph.SetGraphParameters(map[string]string{"graph_filepath": outputPath})
+	poleGraph.AddSeries(map[string]string{"label": "poles", "style": "k."}, poleData)
+	MakePlot(poleGraph, outputPath)
+}

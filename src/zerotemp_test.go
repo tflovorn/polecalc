@@ -72,4 +72,10 @@ func TestGc0(t *testing.T) {
 			t.Fatal("did not get expected pole value")
 		}
 	}
+	split := 0.01
+	poleCurve := func(x float64) Vector2 {
+		val := 0.5*math.Pi + split*(2*x-1)
+		return Vector2{val, val}
+	}
+	ZeroTempPlotPoleCurve(solvedEnv, poleCurve, 2048, "zerotemp.testignore.polecurve")
 }
