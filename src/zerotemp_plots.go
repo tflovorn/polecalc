@@ -28,8 +28,8 @@ func ZeroTempPlotGc0(env Environment, k Vector2, numOmega uint, outputPath strin
 	imGraph := NewGraph()
 	rePath := outputPath + "_re"
 	imPath := outputPath + "_im"
-	reGraph.SetGraphParameters(map[string]string{"graph_filepath": rePath})
-	imGraph.SetGraphParameters(map[string]string{"graph_filepath": imPath})
+	reGraph.SetGraphParameters(map[string]interface{}{"graph_filepath": rePath})
+	imGraph.SetGraphParameters(map[string]interface{}{"graph_filepath": imPath})
 	reData := make([][]float64, len(omegas))
 	imData := make([][]float64, len(omegas))
 	for i, _ := range reData {
@@ -43,12 +43,12 @@ func ZeroTempPlotGc0(env Environment, k Vector2, numOmega uint, outputPath strin
 	return nil
 }
 
-func ZeroTempPlotPolePlane(env Environment, outputPath string) os.Error {
-	polePlane, err := ZeroTempGreenPolePlane(env, 128)
+func ZeroTempPlotPolePlane(env Environment, outputPath string, sideLength uint32) os.Error {
+	polePlane, err := ZeroTempGreenPolePlane(env, sideLength)
 	if err != nil {
 		return err
 	}
-	graphPoleData(polePlane, outputPath)
+	graphPoleData(polePlane, outputPath, &Vector2{8.0, 8.0})
 	return nil
 }
 
@@ -59,19 +59,23 @@ func ZeroTempPlotPoleCurve(env Environment, poleCurve func(float64) Vector2, num
 	if err != nil {
 		return err
 	}
-	graphPoleData(polePoints, outputPath)
+	graphPoleData(polePoints, outputPath, nil)
 	return nil
 }
 
-func graphPoleData(poles []GreenPole, outputPath string) {
+func graphPoleData(poles []GreenPole, outputPath string, dims *Vector2) {
 	poleData := [][]float64{}
-	println(len(poles))
 	for _, gp := range poles {
 		k := gp.K
 		poleData = append(poleData, []float64{k.X, k.Y})
 	}
 	poleGraph := NewGraph()
-	poleGraph.SetGraphParameters(map[string]string{"graph_filepath": outputPath})
+	params := make(map[string]interface{})
+	if dims != nil {
+		params["dimensions"] = []float64{dims.X, dims.Y}
+	}
+	params["graph_filepath"] = outputPath
+	poleGraph.SetGraphParameters(params)
 	poleGraph.AddSeries(map[string]string{"label": "poles", "style": "k."}, poleData)
 	MakePlot(poleGraph, outputPath)
 }

@@ -39,6 +39,11 @@ func FuzzyEqual(x, y float64) bool {
 	return math.Fabs(x-y) < MachEpsFloat64()
 }
 
+// Are x and y within a smallish multiple of MachEpsFloat64() of one another?
+func FuzzierEqual(x, y float64) bool {
+	return math.Fabs(x-y) < (MachEpsFloat64() * 64)
+}
+
 // Convert string to byte slice
 func StringToBytes(str string) ([]byte, os.Error) {
 	reader := strings.NewReader(str)
@@ -61,4 +66,8 @@ func MakeRange(left, right float64, num uint) []float64 {
 		vals[i] = left + float64(i)*step
 	}
 	return vals
+}
+
+func plusMinus(x, y float64) (float64, float64) {
+	return x + y, x - y
 }

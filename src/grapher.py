@@ -49,7 +49,11 @@ def make_graph(graph_data):
     '''
     if isinstance(graph_data, list):
         return [make_graph(some_graph) for some_graph in graph_data]
-    fig = plt.figure()
+    try:
+        dims = graph_data["dimensions"]
+        fig = plt.figure(figsize=(dims[0], dims[1]))
+    except:
+        fig = plt.figure()
     axes = fig.add_subplot(1, 1, 1)
     bounds = [None, None]
     for series in graph_data["series"]:

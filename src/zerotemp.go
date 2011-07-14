@@ -190,29 +190,48 @@ func addToCacheImGc0(env Environment, k Vector2, spl *CubicSpline) {
 	}
 }
 
+// imaginary part of Green's function
+func deltaTermsGc0(env Environment, k Vector2, q Vector2) ([]float64, []float64) {
+	omega_q := ZeroTempOmega(env, q)
+	E_h := ZeroTempPairEnergy(env, q)
+	lambda_p, lambda_m := plusMinus(1, env.Lambda()/ZeroTempOmega(env, q))
+	// 0 in f_p & f_m is really bose function of omega_q = ZeroTempOmega(q)
+	// since omega_q > 0 and mu < 0, bose function result is 0
+	f_p, f_m := plusMinus(0, ZeroTempFermi(ZeroTempPairEnergy(env, q.Sub(k))))
+	c := -0.25 * math.Pi
+	if env.Superconducting {
+		xi_p, xi_m := plusMinus(1, Xi(env, q)/ZeroTempPairEnergy(env, q))
+		omegas := []float64{omega_q - E_h, omega_q + E_h, -omega_q - E_h, -omega_q + E_h}
+
+		coeffs := []float64{c * lambda_p * xi_p * f_p, c * lambda_p * xi_m * (f_m + 1), -c * lambda_m * xi_m * (f_m + 1), -c * lambda_m * xi_m * f_p}
+		return omegas, coeffs
+	}
+	omegas := []float64{omega_q - E_h, -omega_q - E_h}
+	coeffs := []float64{c * lambda_p * f_p, -c * lambda_m * (f_m + 1)}
+	return omegas, coeffs
+}
+
 // imaginary part - values for all omega are calculated simultaneously, so
 // return two slices of floats.  first is omega values, second is coefficients
 func ZeroTempImGc0(env Environment, k Vector2) ([]float64, []float64) {
-	maxWorker := func(k Vector2) float64 {
-		return ZeroTempPairEnergy(env, k)
-	}
-	pairEnergyMax := Maximum(env.GridLength, maxWorker)
-	maxAbsOmega := env.Lambda() + pairEnergyMax
-	omegaMin, omegaMax := -maxAbsOmega, maxAbsOmega
-	plusMinus := func(x, y float64) (float64, float64) {
-		return x + y, x - y
+	var omegaMin, omegaMax float64
+	if env.Superconducting {
+		pairWorker := func(k Vector2) float64 {
+			return ZeroTempPairEnergy(env, k)
+		}
+		pairEnergyMax := Maximum(env.GridLength, pairWorker)
+		maxAbsOmega := env.Lambda() + pairEnergyMax
+		omegaMin, omegaMax = -maxAbsOmega, maxAbsOmega
+	} else {
+		xiWorker := func(k Vector2) float64 {
+			return Xi(env, k)
+		}
+		xiMax := Maximum(env.GridLength, xiWorker)
+		maxAbsOmega := env.Lambda() + xiMax
+		omegaMin, omegaMax = -maxAbsOmega, maxAbsOmega
 	}
 	deltaTerms := func(q Vector2) ([]float64, []float64) {
-		omega_q := ZeroTempOmega(env, q)
-		E_h := ZeroTempPairEnergy(env, q)
-		omegas := []float64{omega_q - E_h, omega_q + E_h, -omega_q - E_h, -omega_q + E_h}
-		lambda_p, lambda_m := plusMinus(1, env.Lambda()/ZeroTempOmega(env, q))
-		xi_p, xi_m := plusMinus(1, Xi(env, q)/ZeroTempPairEnergy(env, q))
-		// 0 here is really bose function of omega_q = ZeroTempOmega(q)
-		// since omega_q > 0 and mu < 0, bose function result is 0
-		f_p, f_m := plusMinus(0, ZeroTempFermi(ZeroTempPairEnergy(env, q.Sub(k))))
-		coeffs := []float64{0.25 * lambda_p * xi_p * f_p, 0.25 * lambda_p * xi_m * (f_m + 1), -0.25 * lambda_m * xi_m * (f_m + 1), -0.25 * lambda_m * xi_m * f_p}
-		return omegas, coeffs
+		return deltaTermsGc0(env, k, q)
 	}
 	binner := NewDeltaBinner(deltaTerms, omegaMin, omegaMax, env.ImGc0Bins)
 	result := DeltaBin(env.GridLength, binner)
@@ -265,7 +284,7 @@ func (eq ZeroTempGreenPoleEq) AbsError(args interface{}) float64 {
 	env, omega := greenArgs.Env, greenArgs.Omega
 	ReGc0, err := ZeroTempReGc0(env, eq.K, omega)
 	if err != nil {
-		panic("error calculating ReGc0 searching for pole")
+		panic("error encountered searching for ReGc0: " + err.String())
 	}
 	return 1 - ZeroTempElectronEnergy(env, eq.K)*ReGc0
 }
@@ -347,7 +366,7 @@ func capturePoles(env Environment, k Vector2, poles []GreenPole) ([]GreenPole, o
 		return poles, err
 	} else {
 		for _, p := range kPoles {
-			println(k.String(), p)
+			println("got pole k=", k.String(), p)
 			poles = append(poles, GreenPole{k, p})
 		}
 	}

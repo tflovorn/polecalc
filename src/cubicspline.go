@@ -83,7 +83,7 @@ func (s *CubicSpline) indexOf(x float64) int {
 	step := (xMax - xMin) / float64(numSplines)
 	i := int(math.Floor((x - xMin) / step))
 	// final point does not jump to a new spline
-	if i == numSplines {
+	if i == numSplines && FuzzierEqual(x, xMax) {
 		return i - 1
 	}
 	return i

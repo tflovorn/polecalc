@@ -14,21 +14,21 @@ type jsonObject map[string]interface{}
 
 // Intermediate representation for graph data.
 type Graph struct {
-	graphParameters  map[string]string
+	graphParameters  map[string]interface{}
 	seriesParameters []map[string]string
 	seriesData       [][][]float64
 }
 
 func NewGraph() *Graph {
 	graph := new(Graph)
-	graph.graphParameters = make(map[string]string)
+	graph.graphParameters = make(map[string]interface{})
 	graph.seriesParameters = make([]map[string]string, 0)
 	graph.seriesData = make([][][]float64, 0)
 	return graph
 }
 
 // Set the global graph parameters as given in params.
-func (graph *Graph) SetGraphParameters(params map[string]string) {
+func (graph *Graph) SetGraphParameters(params map[string]interface{}) {
 	for key, value := range params {
 		graph.graphParameters[key] = value
 	}

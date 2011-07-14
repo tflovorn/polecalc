@@ -43,6 +43,10 @@ func SplineIntegral(xs, ys []float64, left, right float64) (float64, os.Error) {
 func PvIntegral(f Func1D, a, b, w, eps float64, n uint) (float64, os.Error) {
 	// can't integrate if a boundary is on top of the pole
 	if math.Fabs(a-w) < eps || math.Fabs(b-w) < eps {
+		if eps/2 > MachEpsFloat64() {
+			println("cutting eps to ", eps/2)
+			return PvIntegral(f, a, b, w, eps/2, n)
+		}
 		return 0.0, os.NewError("PvIntegral error: boundary too close to pole")
 	}
 	// if the bounds were given out of order, we need a minus sign later

@@ -164,7 +164,11 @@ func (binner DeltaBinner) Step() float64 {
 }
 
 func (binner DeltaBinner) BinVarToIndex(binVar float64) int {
-	return int(math.Floor((binVar - binner.binStart) / binner.Step()))
+	i := int(math.Floor((binVar - binner.binStart) / binner.Step()))
+	if uint(i) == binner.numBins && FuzzierEqual(binVar, binner.binStop) {
+		return i - 1
+	}
+	return i
 }
 
 func (binner DeltaBinner) IndexToBinVar(index int) float64 {
