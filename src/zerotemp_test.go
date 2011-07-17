@@ -79,9 +79,9 @@ func TestGc0(t *testing.T) {
 		val := 0.5*math.Pi + split*(2*x-1)
 		return Vector2{val, val}
 	}
-	ZeroTempPlotPoleCurve(solvedEnv, poleCurve, 512, "zerotemp.testignore.polecurve.superconducting")
-	ZeroTempPlotPolePlane(solvedEnv, "zerotemp.testignore.poleplane.superconducting", 128)
+	ZeroTempPlotPoleCurve(solvedEnv, poleCurve, 128, "zerotemp.testignore.polecurve.superconducting")
+	ZeroTempPlotPolePlane(solvedEnv, "zerotemp.testignore.poleplane.superconducting", 1024)
 	solvedEnv.Superconducting = false
-	ZeroTempPlotPoleCurve(solvedEnv, poleCurve, 512, "zerotemp.testignore.polecurve.nonsc")
-	ZeroTempPlotPolePlane(solvedEnv, "zerotemp.testignore.poleplane.nonsc", 128)
+	ZeroTempPlotPoleCurve(solvedEnv, poleCurve, 128, "zerotemp.testignore.polecurve.nonsc")
+	ZeroTempPlotPolePlane(solvedEnv, "zerotemp.testignore.poleplane.nonsc", 64)
 }

@@ -44,11 +44,11 @@ func ZeroTempPlotGc0(env Environment, k Vector2, numOmega uint, outputPath strin
 }
 
 func ZeroTempPlotPolePlane(env Environment, outputPath string, sideLength uint32) os.Error {
-	polePlane, err := ZeroTempGreenPolePlane(env, sideLength)
+	polePlane, err := ZeroTempGreenPolePlane(env, sideLength, true)
 	if err != nil {
 		return err
 	}
-	graphPoleData(polePlane, outputPath, &Vector2{8.0, 8.0})
+	graphPoleData(polePlane, outputPath, &Vector2{32.0, 32.0})
 	return nil
 }
 
