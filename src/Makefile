@@ -16,6 +16,7 @@ utility.go\
 tridiagonal.go\
 vector.go\
 zerotemp.go\
+zerotemp_greens.go\
 zerotemp_plots.go\
 
 include $(GOROOT)/src/Make.pkg

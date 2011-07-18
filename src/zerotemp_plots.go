@@ -1,8 +1,11 @@
 package polecalc
 
-import "os"
+import (
+	"os"
+	"math"
+)
 
-func ZeroTempPlotGc0(env Environment, k Vector2, numOmega uint, outputPath string) os.Error {
+func ZeroTempPlotGc(env Environment, k Vector2, numOmega uint, outputPath string) os.Error {
 	imOmegas, imCalcValues := ZeroTempImGc0(env, k)
 	imSpline, err := NewCubicSpline(imOmegas, imCalcValues)
 	if err != nil {
@@ -12,34 +15,55 @@ func ZeroTempPlotGc0(env Environment, k Vector2, numOmega uint, outputPath strin
 	omegas := MakeRange(imOmegaMin-1.0, imOmegaMax+1.0, numOmega)
 	realValues := make([]float64, numOmega)
 	imValues := make([]float64, numOmega)
+	fullReValues := make([]float64, numOmega)
 	for i := 0; i < int(numOmega); i++ {
 		if omegas[i] < imOmegaMin || omegas[i] > imOmegaMax {
 			imValues[i] = 0.0
 		} else {
 			imValues[i] = imSpline.At(omegas[i])
 		}
-		g, err := ZeroTempReGc0(env, k, omegas[i])
+		re, err := ZeroTempReGc0(env, k, omegas[i])
 		if err != nil {
 			return err
 		}
-		realValues[i] = g
+		realValues[i] = re
+		fullRe, err := FullReGc(env, k, omegas[i])
+		if err != nil {
+			return err
+		}
+		println(fullRe)
+		fullReValues[i] = fullRe
 	}
 	reGraph := NewGraph()
 	imGraph := NewGraph()
+	fullReGraph := NewGraph()
 	rePath := outputPath + "_re"
 	imPath := outputPath + "_im"
+	fullRePath := outputPath + "_fullRe"
 	reGraph.SetGraphParameters(map[string]interface{}{"graph_filepath": rePath})
 	imGraph.SetGraphParameters(map[string]interface{}{"graph_filepath": imPath})
+	fullReGraph.SetGraphParameters(map[string]interface{}{"graph_filepath": fullRePath})
 	reData := make([][]float64, len(omegas))
 	imData := make([][]float64, len(omegas))
+	fullReData := make([][]float64, len(omegas))
 	for i, _ := range reData {
 		reData[i] = []float64{omegas[i], realValues[i]}
 		imData[i] = []float64{omegas[i], imValues[i]}
+		if !math.IsNaN(fullReValues[i]) {
+			fullReData[i] = []float64{omegas[i], fullReValues[i]}
+		} else {
+			fullReData[i] = []float64{omegas[i], 0.0}
+		}
 	}
 	reGraph.AddSeries(map[string]string{"label": "re_gc0"}, reData)
 	imGraph.AddSeries(map[string]string{"label": "im_gc0"}, imData)
+	fullReGraph.AddSeries(map[string]string{"label": "fullRe_gc0"}, fullReData)
 	MakePlot(reGraph, rePath)
 	MakePlot(imGraph, imPath)
+	err = MakePlot(fullReGraph, fullRePath)
+	if err != nil {
+		return err
+	}
 	return nil
 }
 
