@@ -11,8 +11,8 @@
 	"ImGc0Bins":256,
 	"ReGc0Points":256,
 	"ReGc0dw":1e-10,
-	"DeltaS":2.0,
-	"CS":1.0,
-	"T":4.0,
+	"DeltaS":1.0,
+	"CS":0.1,
+	"T":2.0,
 	"Superconducting":true
 }

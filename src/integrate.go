@@ -2,7 +2,7 @@ package polecalc
 
 import (
 	"os"
-	"math"
+	//"math"
 )
 
 // Integrate the cubic spline interpolation of y from x = left to x = right.  
@@ -42,12 +42,12 @@ func SplineIntegral(xs, ys []float64, left, right float64) (float64, os.Error) {
 // spline on each side of the pole.
 func PvIntegral(f Func1D, a, b, w, eps float64, n uint) (float64, os.Error) {
 	// can't integrate if a boundary is on top of the pole
-	if math.Fabs(a-w) < eps || math.Fabs(b-w) < eps {
-		if eps/2 > MachEpsFloat64() {
-			println("cutting eps to ", eps/2)
-			return PvIntegral(f, a, b, w, eps/2, n)
-		}
-		return 0.0, os.NewError("PvIntegral error: boundary too close to pole")
+	drop := 10.0
+	if w > a && w-a < eps {
+		eps = (w - a) / drop
+	}
+	if b > w && b-w < eps {
+		eps = (b - w) / drop
 	}
 	// if the bounds were given out of order, we need a minus sign later
 	sign := 1.0
@@ -67,13 +67,25 @@ func PvIntegral(f Func1D, a, b, w, eps float64, n uint) (float64, os.Error) {
 			yls[i], yrs[i] = f(xls[i]), f(xrs[i])
 		}
 		// do the integrals
-		leftInt, err := SplineIntegral(xls, yls, a, wl)
-		if err != nil {
-			return 0.0, err
+		// if the pole is very close to the boundary, integral ~ 0
+		var leftInt, rightInt float64
+		if wl < a || FuzzyEqual(w-a, 0.0) {
+			leftInt = 0.0
+		} else {
+			var err os.Error
+			leftInt, err = SplineIntegral(xls, yls, a, wl)
+			if err != nil {
+				return 0.0, err
+			}
 		}
-		rightInt, err := SplineIntegral(xrs, yrs, wr, b)
-		if err != nil {
-			return 0.0, err
+		if wr > b || FuzzyEqual(b-w, 0.0) {
+			rightInt = 0.0
+		} else {
+			var err os.Error
+			rightInt, err = SplineIntegral(xrs, yrs, wr, b)
+			if err != nil {
+				return 0.0, err
+			}
 		}
 		return sign * (leftInt + rightInt), nil
 	}

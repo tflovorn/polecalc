@@ -74,14 +74,15 @@ func TestGc0(t *testing.T) {
 		//}
 	}
 	fmt.Printf("gap=%f\n", ZeroTempGap(solvedEnv, k))
+	ZeroTempPlotGc0(solvedEnv, k, 128, "zerotemp.gc0_k0_w0.testignore")
 	split := 0.01
 	poleCurve := func(x float64) Vector2 {
 		val := 0.5*math.Pi + split*(2*x-1)
 		return Vector2{val, val}
 	}
-	ZeroTempPlotPoleCurve(solvedEnv, poleCurve, 128, "zerotemp.testignore.polecurve.superconducting")
-	ZeroTempPlotPolePlane(solvedEnv, "zerotemp.testignore.poleplane.superconducting", 1024)
+	//ZeroTempPlotPoleCurve(solvedEnv, poleCurve, 64, "zerotemp.testignore.polecurve.superconducting")
+	//ZeroTempPlotPolePlane(solvedEnv, "zerotemp.testignore.poleplane.superconducting", 64)
 	solvedEnv.Superconducting = false
-	ZeroTempPlotPoleCurve(solvedEnv, poleCurve, 128, "zerotemp.testignore.polecurve.nonsc")
+	ZeroTempPlotPoleCurve(solvedEnv, poleCurve, 64, "zerotemp.testignore.polecurve.nonsc")
 	ZeroTempPlotPolePlane(solvedEnv, "zerotemp.testignore.poleplane.nonsc", 64)
 }

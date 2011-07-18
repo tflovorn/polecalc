@@ -263,7 +263,7 @@ func ZeroTempImGc0Point(env Environment, k Vector2, omega float64) (float64, os.
 		return 0.0, err
 	}
 	omegaMin, omegaMax := imPart.Range()
-	if omegaMin <= omega || omega <= omegaMax {
+	if omegaMin <= omega && omega <= omegaMax {
 		return imPart.At(omega), nil
 	}
 	return 0.0, nil
@@ -279,7 +279,7 @@ func ZeroTempReGc0(env Environment, k Vector2, omega float64) (float64, os.Error
 	// assume that Im(Gc0) is smooth near omegaPrime, so that spline
 	// interpolation is good enough
 	integrand := func(omegaPrime float64) float64 {
-		if omegaMin <= omega || omega <= omegaMax {
+		if omegaMin <= omega && omega <= omegaMax {
 			return (1 / math.Pi) * imPart.At(omegaPrime) / (omegaPrime - omega)
 		}
 		return 0.0
@@ -311,7 +311,12 @@ func (eq ZeroTempGreenPoleEq) AbsError(args interface{}) float64 {
 	if err != nil {
 		panic("error encountered searching for ReGc0: " + err.String())
 	}
-	return 1.0/ReGc0 - ZeroTempElectronEnergy(env, eq.K)
+	ImGc0, err := ZeroTempImGc0Point(env, eq.K, omega)
+	if err != nil {
+		panic("error encountered searching for ImGc0: " + err.String())
+	}
+	epsilon_k := ZeroTempElectronEnergy(env, eq.K)
+	return (ReGc0*ReGc0+ImGc0*ImGc0)*epsilon_k - ReGc0
 }
 
 func (eq ZeroTempGreenPoleEq) SetArguments(omega float64, args interface{}) interface{} {

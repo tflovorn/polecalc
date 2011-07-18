@@ -8,7 +8,7 @@ import (
 	"math"
 )
 
-const SplineExtrapolationDistance = 1e-14
+const SplineExtrapolationDistance = 1e-6
 
 // Cubic spline is defined by the set of functions s_i given on the intervals
 // between the values of xs: s_i(x) is defined on [xs[i],xs[i+1]).
@@ -81,10 +81,16 @@ func (s *CubicSpline) indexOf(x float64) int {
 	// number of points
 	numSplines := len(s.xs) - 1
 	step := (xMax - xMin) / float64(numSplines)
+	if FuzzyEqual(xMax-xMin, 0.0) {
+		panic("cubic spline step size ~ 0, cannot find index")
+	}
 	i := int(math.Floor((x - xMin) / step))
-	// final point does not jump to a new spline
-	if i == numSplines && FuzzierEqual(x, xMax) {
+	// allow a bit of extrapolation on the endpoints
+	if i == numSplines && xMax-x < SplineExtrapolationDistance {
 		return i - 1
+	}
+	if i == -1 && x-xMin < SplineExtrapolationDistance {
+		return 0
 	}
 	return i
 }
