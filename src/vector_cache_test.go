@@ -23,3 +23,11 @@ func TestVectorSetSticks(t *testing.T) {
 		t.Fatalf("VectorCache returned the wrong value")
 	}
 }
+
+func TestVectorBadSearch(t *testing.T) {
+	key := Vector2{0.0, 0.0}
+	cache := NewVectorCache()
+	if cache.Contains(key) {
+		t.Fatalf("VectorCache reports it contains a key not given to it")
+	}
+}

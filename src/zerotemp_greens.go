@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"math"
 	"os"
-	"reflect"
 )
+
+var imGc0Cache = NewListCache()
 
 // --- noninteracting Green's function for the physical electron ---
 
@@ -58,43 +59,29 @@ func ZeroTempImGc0(env Environment, k Vector2) ([]float64, []float64) {
 	return omegas, result
 }
 
-func cachedEnvIndex(env Environment) int {
-	for i, cacheEnv := range imGc0CacheEnv {
-		if reflect.DeepEqual(env, cacheEnv) {
-			return i
-		}
-	}
-	return -1
-}
-
 func cachedImGc0(env Environment, k Vector2) (*CubicSpline, bool) {
-	i := cachedEnvIndex(env)
-	if i == -1 {
-		return nil, false
-	}
-	cacheX, ok := imGc0CacheK[i][k.X]
+	kCacheInterface, ok := imGc0Cache.Get(env)
 	if !ok {
 		return nil, false
 	}
-	spline, ok := cacheX[k.Y]
-	return spline, ok
+	kCache := kCacheInterface.(VectorCache)
+	spline, ok := kCache.Get(k)
+	if ok {
+		return spline.(*CubicSpline), ok
+	}
+	return nil, ok
 }
 
 func addToCacheImGc0(env Environment, k Vector2, spl *CubicSpline) {
-	i := cachedEnvIndex(env)
-	if i == -1 {
+	if !imGc0Cache.Contains(env) {
 		// env not encountered yet
-		imGc0CacheEnv = append(imGc0CacheEnv, env)
-		i = len(imGc0CacheEnv) - 1
-		imGc0CacheK[i] = make(map[float64]map[float64]*CubicSpline)
-	}
-	if xCache, ok := imGc0CacheK[i][k.X]; ok {
-		// have seen this X before
-		xCache[k.Y] = spl
+		kCache := *NewVectorCache()
+		kCache.Set(k, spl)
+		imGc0Cache.Set(env, kCache)
 	} else {
-		// new X
-		imGc0CacheK[i][k.X] = make(map[float64]*CubicSpline)
-		imGc0CacheK[i][k.X][k.Y] = spl
+		kCacheInterface, _ := imGc0Cache.Get(env)
+		kCache := kCacheInterface.(VectorCache)
+		kCache.Set(k, spl)
 	}
 }
 

@@ -22,3 +22,11 @@ func TestListSetSticks(t *testing.T) {
 		t.Fatalf("ListCache returned the wrong value")
 	}
 }
+
+func TestListBadSearch(t *testing.T) {
+	key := Vector2{0.0, 0.0}
+	cache := NewListCache()
+	if cache.Contains(key) {
+		t.Fatalf("ListCache reports it contains a key not given to it")
+	}
+}

@@ -5,9 +5,6 @@ import (
 	"os"
 )
 
-var imGc0CacheEnv = make([]Environment, 0)
-var imGc0CacheK = make(map[int]map[float64]map[float64]*CubicSpline)
-
 // Returns the system of equations needed to solve the system at T = 0
 func NewZeroTempSystem(tolerances []float64) *SelfConsistentSystem {
 	eqD1 := ZeroTempD1Equation{}

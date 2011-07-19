@@ -90,5 +90,5 @@ func TestGc0(t *testing.T) {
 		ZeroTempPlotPoleCurve(solvedEnv, poleCurve, 64, "zerotemp.testignore.polecurve.nonsc")
 		ZeroTempPlotPolePlane(solvedEnv, "zerotemp.testignore.poleplane.nonsc", 64)
 	*/
-	//PlotGcSymmetryLines(solvedEnv, 8, 256, "zerotemp.testignore.symmetry")
+	PlotGcSymmetryLines(solvedEnv, 8, 256, "zerotemp.testignore.symmetry")
 }
