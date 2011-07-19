@@ -168,6 +168,9 @@ func (binner DeltaBinner) BinVarToIndex(binVar float64) int {
 	if uint(i) == binner.numBins && FuzzierEqual(binVar, binner.binStop) {
 		return i - 1
 	}
+	if i == -1 && FuzzierEqual(binVar, binner.binStart) {
+		return 0
+	}
 	return i
 }
 
