@@ -7,14 +7,16 @@ bracket.go\
 cubicspline.go\
 environment.go\
 integrate.go\
+list_cache.go\
 mesh2d.go\
-mesh_functions.go\
+mesh_aggregates.go\
 mpljson.go\
 selfconsistent.go\
 spectrum.go\
 utility.go\
 tridiagonal.go\
 vector.go\
+vector_cache.go\
 zerotemp.go\
 zerotemp_greens.go\
 zerotemp_plots.go\

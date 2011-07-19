@@ -33,6 +33,10 @@ func (v Vector2) NormSquared() float64 {
 	return v.Dot(v)
 }
 
+func (v Vector2) Equals(u Vector2) bool {
+	return v.X == u.X && v.Y == u.Y
+}
+
 func (v Vector2) String() string {
 	return fmt.Sprintf("(%f, %f)", v.X, v.Y)
 }

@@ -4,8 +4,8 @@ import (
 	"testing"
 	"reflect"
 	"flag"
-	"math"
-	"fmt"
+	//"math"
+	//"fmt"
 )
 
 var cached *bool = flag.Bool("gc_cache", false, "used cached Environment for TestGc0")
@@ -58,34 +58,37 @@ func TestGc0(t *testing.T) {
 		}
 		solvedEnv = *cacheEnv
 	}
-	k := Vector2{0.0 * math.Pi, 0.0 * math.Pi}
-	poles, err := ZeroTempGreenPolePoint(solvedEnv, k)
-	if err != nil {
-		t.Fatal(err)
-	}
-	//if len(poles) != 4 {
-	//	t.Fatal("did not get expected number of poles")
-	//}
-	//expected := []string{"-3.8862440783169987", "3.86016952787911", "3.9111002349865496", "7.560058812941273"}
-	for i, p := range poles {
-		fmt.Printf("%d %v\n", i, p)
-		//if fmt.Sprintf("%v", p) != expected[i] {
-		//	t.Fatal("did not get expected pole value")
+	/*
+		k := Vector2{0.0 * math.Pi, 0.0 * math.Pi}
+		poles, err := ZeroTempGreenPolePoint(solvedEnv, k)
+		if err != nil {
+			t.Fatal(err)
+		}
+		//if len(poles) != 4 {
+		//	t.Fatal("did not get expected number of poles")
 		//}
-	}
-	fmt.Printf("gap=%f\n", ZeroTempGap(solvedEnv, k))
-	err = ZeroTempPlotGc(solvedEnv, k, 512, "zerotemp.gc0_k0_w0.testignore")
-	if err != nil {
-		t.Fatal(err)
-	}
-	split := 0.01
-	poleCurve := func(x float64) Vector2 {
-		val := 0.5*math.Pi + split*(2*x-1)
-		return Vector2{val, val}
-	}
-	ZeroTempPlotPoleCurve(solvedEnv, poleCurve, 64, "zerotemp.testignore.polecurve.superconducting")
-	ZeroTempPlotPolePlane(solvedEnv, "zerotemp.testignore.poleplane.superconducting", 128)
-	solvedEnv.Superconducting = false
-	ZeroTempPlotPoleCurve(solvedEnv, poleCurve, 64, "zerotemp.testignore.polecurve.nonsc")
-	ZeroTempPlotPolePlane(solvedEnv, "zerotemp.testignore.poleplane.nonsc", 64)
+		//expected := []string{"-3.8862440783169987", "3.86016952787911", "3.9111002349865496", "7.560058812941273"}
+		for i, p := range poles {
+			fmt.Printf("%d %v\n", i, p)
+			//if fmt.Sprintf("%v", p) != expected[i] {
+			//	t.Fatal("did not get expected pole value")
+			//}
+		}
+		fmt.Printf("gap=%f\n", ZeroTempGap(solvedEnv, k))
+		err = ZeroTempPlotGc(solvedEnv, k, 512, "zerotemp.gc0_k0_w0.testignore")
+		if err != nil {
+			t.Fatal(err)
+		}
+		split := 0.01
+		poleCurve := func(x float64) Vector2 {
+			val := 0.5*math.Pi + split*(2*x-1)
+			return Vector2{val, val}
+		}
+		ZeroTempPlotPoleCurve(solvedEnv, poleCurve, 64, "zerotemp.testignore.polecurve.superconducting")
+		ZeroTempPlotPolePlane(solvedEnv, "zerotemp.testignore.poleplane.superconducting", 128)
+		solvedEnv.Superconducting = false
+		ZeroTempPlotPoleCurve(solvedEnv, poleCurve, 64, "zerotemp.testignore.polecurve.nonsc")
+		ZeroTempPlotPolePlane(solvedEnv, "zerotemp.testignore.poleplane.nonsc", 64)
+	*/
+	//PlotGcSymmetryLines(solvedEnv, 8, 256, "zerotemp.testignore.symmetry")
 }

@@ -3,7 +3,9 @@ package polecalc
 import (
 	"os"
 	"math"
+	"fmt"
 )
+
 
 func ZeroTempPlotGc(env Environment, k Vector2, numOmega uint, outputPath string) os.Error {
 	imOmegas, imCalcValues := ZeroTempImGc0(env, k)
@@ -31,7 +33,6 @@ func ZeroTempPlotGc(env Environment, k Vector2, numOmega uint, outputPath string
 		if err != nil {
 			return err
 		}
-		println(fullRe)
 		fullReValues[i] = fullRe
 	}
 	reGraph := NewGraph()
@@ -58,8 +59,14 @@ func ZeroTempPlotGc(env Environment, k Vector2, numOmega uint, outputPath string
 	reGraph.AddSeries(map[string]string{"label": "re_gc0"}, reData)
 	imGraph.AddSeries(map[string]string{"label": "im_gc0"}, imData)
 	fullReGraph.AddSeries(map[string]string{"label": "fullRe_gc0"}, fullReData)
-	MakePlot(reGraph, rePath)
-	MakePlot(imGraph, imPath)
+	err = MakePlot(reGraph, rePath)
+	if err != nil {
+		return err
+	}
+	err = MakePlot(imGraph, imPath)
+	if err != nil {
+		return err
+	}
 	err = MakePlot(fullReGraph, fullRePath)
 	if err != nil {
 		return err
@@ -67,6 +74,19 @@ func ZeroTempPlotGc(env Environment, k Vector2, numOmega uint, outputPath string
 	return nil
 }
 
+// Plot im/re gc0 and re gc along lines of high symmetry in k space.
+func PlotGcSymmetryLines(env Environment, kPoints, numOmega uint, outputPath string) os.Error {
+	callback := func(k Vector2) os.Error {
+		extra := fmt.Sprintf("_kx_%f_ky_%f", k.X, k.Y)
+		fullPath := outputPath + extra
+		err := ZeroTempPlotGc(env, k, numOmega, fullPath)
+		return err
+	}
+	err := CallOnSymmetryLines(kPoints, callback)
+	return err
+}
+
+// Plot the existence of poles throughout the k plane.
 func ZeroTempPlotPolePlane(env Environment, outputPath string, sideLength uint32) os.Error {
 	polePlane, err := ZeroTempGreenPolePlane(env, sideLength, true)
 	if err != nil {
@@ -75,6 +95,7 @@ func ZeroTempPlotPolePlane(env Environment, outputPath string, sideLength uint32
 	graphPoleData(polePlane, outputPath, &Vector2{32.0, 32.0})
 	return nil
 }
+
 
 // Plot the line of poles specified by poleCurve, which takes a float value from
 // 0 to 1 and returns a Vector2 corresponding to that value
