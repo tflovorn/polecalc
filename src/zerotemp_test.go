@@ -78,16 +78,14 @@ func TestGc0(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	/*
-		split := 0.01
-		poleCurve := func(x float64) Vector2 {
-			val := 0.5*math.Pi + split*(2*x-1)
-			return Vector2{val, val}
-		}
-		ZeroTempPlotPoleCurve(solvedEnv, poleCurve, 64, "zerotemp.testignore.polecurve.superconducting")
-		ZeroTempPlotPolePlane(solvedEnv, "zerotemp.testignore.poleplane.superconducting", 64)
-		solvedEnv.Superconducting = false
-		ZeroTempPlotPoleCurve(solvedEnv, poleCurve, 64, "zerotemp.testignore.polecurve.nonsc")
-		ZeroTempPlotPolePlane(solvedEnv, "zerotemp.testignore.poleplane.nonsc", 64)
-	*/
+	split := 0.01
+	poleCurve := func(x float64) Vector2 {
+		val := 0.5*math.Pi + split*(2*x-1)
+		return Vector2{val, val}
+	}
+	ZeroTempPlotPoleCurve(solvedEnv, poleCurve, 64, "zerotemp.testignore.polecurve.superconducting")
+	ZeroTempPlotPolePlane(solvedEnv, "zerotemp.testignore.poleplane.superconducting", 128)
+	solvedEnv.Superconducting = false
+	ZeroTempPlotPoleCurve(solvedEnv, poleCurve, 64, "zerotemp.testignore.polecurve.nonsc")
+	ZeroTempPlotPolePlane(solvedEnv, "zerotemp.testignore.poleplane.nonsc", 64)
 }

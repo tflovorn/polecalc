@@ -32,6 +32,7 @@ func ZeroTempD1AbsError(env Environment) float64 {
 type ZeroTempD1Equation struct{}
 
 func (eq ZeroTempD1Equation) AbsError(args interface{}) float64 {
+	//println("in d1")
 	return ZeroTempD1AbsError(args.(Environment))
 }
 
@@ -60,6 +61,7 @@ func ZeroTempMuAbsError(env Environment) float64 {
 type ZeroTempMuEquation struct{}
 
 func (eq ZeroTempMuEquation) AbsError(args interface{}) float64 {
+	//println("in mu")
 	return ZeroTempMuAbsError(args.(Environment))
 }
 
@@ -90,6 +92,7 @@ func ZeroTempF0AbsError(env Environment) float64 {
 type ZeroTempF0Equation struct{}
 
 func (eq ZeroTempF0Equation) AbsError(args interface{}) float64 {
+	//println("in f0", args.(Environment).Mu)
 	return ZeroTempF0AbsError(args.(Environment))
 }
 

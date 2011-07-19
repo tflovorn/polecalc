@@ -170,12 +170,15 @@ func (eq ZeroTempGreenPoleEq) AbsError(args interface{}) float64 {
 	if err != nil {
 		panic("error encountered searching for ReGc0: " + err.String())
 	}
-	ImGc0, err := ZeroTempImGc0Point(env, eq.K, omega)
-	if err != nil {
-		panic("error encountered searching for ImGc0: " + err.String())
-	}
+	/*
+		ImGc0, err := ZeroTempImGc0Point(env, eq.K, omega)
+		if err != nil {
+			panic("error encountered searching for ImGc0: " + err.String())
+		}
+	*/
 	epsilon_k := ZeroTempElectronEnergy(env, eq.K)
-	return (ReGc0*ReGc0+ImGc0*ImGc0)*epsilon_k - ReGc0
+	//return (ReGc0*ReGc0+ImGc0*ImGc0)*epsilon_k - ReGc0
+	return 1.0 - epsilon_k*ReGc0
 }
 
 func (eq ZeroTempGreenPoleEq) SetArguments(omega float64, args interface{}) interface{} {
@@ -234,41 +237,6 @@ func (gp GreenPole) String() string {
 	return fmt.Sprintf("k: %v; omega: %f", gp.K, gp.Omega)
 }
 
-// scan the k space looking for poles; return all those found
-func ZeroTempGreenPolePlane(env Environment, pointsPerSide uint32, minimal bool) ([]GreenPole, os.Error) {
-	sqrtN := uint64(pointsPerSide)
-	N := sqrtN * sqrtN
-	poles := []GreenPole{}
-	for i := uint64(0); i < N; i++ {
-		k := SquareAt(i, pointsPerSide)
-		// if minimal is true, plot only 1/8th of the plane
-		// (the remaining parts should be equivalent)
-		if minimal && (k.X < 0 || k.Y < 0 || k.Y > k.X) {
-			continue
-		}
-		var err os.Error
-		poles, err = capturePoles(env, k, poles)
-		if err != nil {
-			return poles, err
-		}
-	}
-	return poles, nil
-}
-
-func ZeroTempGreenPoleCurve(env Environment, poleCurve func(float64) Vector2, numPoints uint) ([]GreenPole, os.Error) {
-	xValues := MakeRange(0.0, 1.0, numPoints)
-	poles := []GreenPole{}
-	for _, x := range xValues {
-		k := poleCurve(x)
-		var err os.Error
-		poles, err = capturePoles(env, k, poles)
-		if err != nil {
-			return poles, err
-		}
-	}
-	return poles, nil
-}
-
 func capturePoles(env Environment, k Vector2, poles []GreenPole) ([]GreenPole, os.Error) {
 	kPoles, err := ZeroTempGreenPolePoint(env, k)
 	if err != nil {
@@ -283,5 +251,30 @@ func capturePoles(env Environment, k Vector2, poles []GreenPole) ([]GreenPole, o
 			poles = append(poles, GreenPole{k, p})
 		}
 	}
+	return poles, err
+}
+
+// scan the k space looking for poles; return all those found
+func ZeroTempGreenPolePlane(env Environment, pointsPerSide uint32, minimal bool) ([]GreenPole, os.Error) {
+	poles := []GreenPole{}
+	callback := func(k Vector2) os.Error {
+		var err os.Error
+		poles, err = capturePoles(env, k, poles)
+		return err
+	}
+	err := CallOnThirdQuad(pointsPerSide, callback)
+	return poles, err
+}
+
+// Scan k values given along poleCurve, which takes a value from 0 to 1 and 
+// returns a vector in k space.  Return all poles found.
+func ZeroTempGreenPoleCurve(env Environment, poleCurve CurveGenerator, numPoints uint) ([]GreenPole, os.Error) {
+	poles := []GreenPole{}
+	callback := func(k Vector2) os.Error {
+		var err os.Error
+		poles, err = capturePoles(env, k, poles)
+		return err
+	}
+	err := CallOnCurve(poleCurve, numPoints, callback)
 	return poles, err
 }
