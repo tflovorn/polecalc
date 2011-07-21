@@ -18,8 +18,8 @@ func deltaTermsGc0(env Environment, k Vector2, q Vector2) ([]float64, []float64)
 	// 0 in f_p & f_m is really bose function of omega_q = ZeroTempOmega(q)
 	// since omega_q > 0 and mu < 0, bose function result is 0
 	f_p, f_m := plusMinus(0, ZeroTempFermi(E_h))
-	c := -0.25 * math.Pi
 	if env.Superconducting {
+		c := -0.25 * math.Pi
 		xi := Xi(env, q.Sub(k))
 		xi_p, xi_m := plusMinus(1, xi/E_h)
 		omegas := []float64{omega_q - E_h, omega_q + E_h, -omega_q - E_h, -omega_q + E_h}
@@ -28,6 +28,7 @@ func deltaTermsGc0(env Environment, k Vector2, q Vector2) ([]float64, []float64)
 		return omegas, coeffs
 	}
 	// non-superconducting if we get here
+	c := -0.5 * math.Pi
 	omegas := []float64{omega_q - E_h, -omega_q - E_h}
 	coeffs := []float64{c * lambda_p * f_p, -c * lambda_m * (f_m + 1)}
 	return omegas, coeffs
@@ -43,14 +44,14 @@ func ZeroTempImGc0(env Environment, k Vector2) ([]float64, []float64) {
 		}
 		pairEnergyMax := Maximum(env.GridLength, pairWorker)
 		maxAbsOmega := env.Lambda() + pairEnergyMax
-		omegaMin, omegaMax = -maxAbsOmega - 1.0, maxAbsOmega + 1.0
+		omegaMin, omegaMax = -maxAbsOmega-1.0, maxAbsOmega+1.0
 	} else {
 		xiWorker := func(q Vector2) float64 {
 			return Xi(env, q.Sub(k))
 		}
 		xiMax := Maximum(env.GridLength, xiWorker)
 		maxAbsOmega := env.Lambda() + xiMax
-		omegaMin, omegaMax = -maxAbsOmega - 1.0, maxAbsOmega + 1.0
+		omegaMin, omegaMax = -maxAbsOmega-1.0, maxAbsOmega+1.0
 	}
 	deltaTerms := func(q Vector2) ([]float64, []float64) {
 		return deltaTermsGc0(env, k, q)
@@ -160,10 +161,10 @@ func (eq ZeroTempGreenPoleEq) AbsError(args interface{}) float64 {
 		panic("error encountered searching for ReGc0: " + err.String())
 	}
 	/*
-	ImGc0, err := ZeroTempImGc0Point(env, eq.K, omega)
-	if err != nil {
-		panic("error encountered searching for ImGc0: " + err.String())
-	}
+		ImGc0, err := ZeroTempImGc0Point(env, eq.K, omega)
+		if err != nil {
+			panic("error encountered searching for ImGc0: " + err.String())
+		}
 	*/
 	epsilon_k := ZeroTempElectronEnergy(env, eq.K)
 	//return (ReGc0*ReGc0+ImGc0*ImGc0)*epsilon_k - ReGc0

@@ -8,11 +8,11 @@
 	"Tz": 0.1,
 	"Thp": 0.1,
 	"X": 0.10,
-	"ImGc0Bins":256,
+	"ImGc0Bins":512,
 	"ReGc0Points":256,
 	"ReGc0dw":1e-10,
 	"DeltaS":1.0,
 	"CS":0.1,
-	"T":4.0,
+	"T":2.0,
 	"Superconducting":true
 }

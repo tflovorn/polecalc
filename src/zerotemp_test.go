@@ -75,22 +75,24 @@ func TestGc0(t *testing.T) {
 	}
 	fmt.Printf("gap=%f\n", ZeroTempGap(solvedEnv, k))
 	/*
-	err = ZeroTempPlotGc(solvedEnv, k, 512, "zerotemp.gc0_k0_w0.testignore")
-	if err != nil {
-		t.Fatal(err)
-	}
+		err = ZeroTempPlotGc(solvedEnv, k, 512, "zerotemp.gc0_k0_w0.testignore")
+		if err != nil {
+			t.Fatal(err)
+		}
 	*/
 	/*
-	split := 0.01
-	poleCurve := func(x float64) Vector2 {
-		val := 0.5*math.Pi + split*(2*x-1)
-		return Vector2{val, val}
-	}
-	ZeroTempPlotPoleCurve(solvedEnv, poleCurve, 64, "zerotemp.testignore.polecurve.superconducting")
-	ZeroTempPlotPolePlane(solvedEnv, "zerotemp.testignore.poleplane.superconducting", 128)
-	solvedEnv.Superconducting = false
-	ZeroTempPlotPoleCurve(solvedEnv, poleCurve, 64, "zerotemp.testignore.polecurve.nonsc")
-	ZeroTempPlotPolePlane(solvedEnv, "zerotemp.testignore.poleplane.nonsc", 64)
+		split := 0.01
+		poleCurve := func(x float64) Vector2 {
+			val := 0.5*math.Pi + split*(2*x-1)
+			return Vector2{val, val}
+		}
+		ZeroTempPlotPoleCurve(solvedEnv, poleCurve, 64, "zerotemp.testignore.polecurve.superconducting")
+		ZeroTempPlotPolePlane(solvedEnv, "zerotemp.testignore.poleplane.superconducting", 128)
+		solvedEnv.Superconducting = false
+		ZeroTempPlotPoleCurve(solvedEnv, poleCurve, 64, "zerotemp.testignore.polecurve.nonsc")
+		ZeroTempPlotPolePlane(solvedEnv, "zerotemp.testignore.poleplane.nonsc", 64)
 	*/
-	PlotGcSymmetryLines(solvedEnv, 8, 256, "zerotemp.testignore.symmetry")
+	PlotGcSymmetryLines(solvedEnv, 8, 256, "zerotemp.testignore.symmetry.sc")
+	solvedEnv.Superconducting = false
+	PlotGcSymmetryLines(solvedEnv, 8, 256, "zerotemp.testignore.symmetry.nosc")
 }
