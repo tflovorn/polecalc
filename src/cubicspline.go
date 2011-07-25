@@ -42,14 +42,14 @@ func NewCubicSpline(xs, ys []float64) (*CubicSpline, os.Error) {
 
 // Value of the interpolated function S(x) at x
 // Will panic if x is outside the interpolation range
-func (s *CubicSpline) At(x float64) float64 {
+func (s *CubicSpline) At(x float64) (float64, os.Error) {
 	xMin, xMax := s.Range()
 	eps := SplineExtrapolationDistance
 	if (xMin-x > eps) || (x-xMax > eps) {
-		panic("accessing cubic spline out of bounds")
+		return 0.0, os.NewError("accessing cubic spline out of bounds")
 	}
 	i := s.indexOf(x)
-	return s.splineAt(i, x)
+	return s.splineAt(i, x), nil
 }
 
 // Individual spline functions si(x) at index i, position x

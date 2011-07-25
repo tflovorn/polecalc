@@ -22,7 +22,11 @@ func ZeroTempPlotGc(env Environment, k Vector2, numOmega uint, outputPath string
 		if omegas[i] < imOmegaMin || omegas[i] > imOmegaMax {
 			imValues[i] = 0.0
 		} else {
-			imValues[i] = imSpline.At(omegas[i])
+			im, err := imSpline.At(omegas[i])
+			if err != nil {
+				return err
+			}
+			imValues[i] = im
 		}
 		re, err := ZeroTempReGc0(env, k, omegas[i])
 		if err != nil {

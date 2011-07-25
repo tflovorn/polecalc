@@ -113,7 +113,7 @@ func ZeroTempImGc0Point(env Environment, k Vector2, omega float64) (float64, os.
 	}
 	omegaMin, omegaMax := imPart.Range()
 	if omegaMin <= omega && omega <= omegaMax {
-		return imPart.At(omega), nil
+		return imPart.At(omega)
 	}
 	return 0.0, nil
 }
@@ -127,11 +127,15 @@ func ZeroTempReGc0(env Environment, k Vector2, omega float64) (float64, os.Error
 	omegaMin, omegaMax := imPart.Range()
 	// assume that Im(Gc0) is smooth near omegaPrime, so that spline
 	// interpolation is good enough
-	integrand := func(omegaPrime float64) float64 {
+	integrand := func(omegaPrime float64) (float64, os.Error) {
 		if omegaMin <= omega && omega <= omegaMax {
-			return (1 / math.Pi) * imPart.At(omegaPrime) / (omegaPrime - omega)
+			im, err := imPart.At(omegaPrime)
+			if err != nil {
+				return 0.0, err
+			}
+			return (1 / math.Pi) * im / (omegaPrime - omega), nil
 		}
-		return 0.0
+		return 0.0, nil
 	}
 	integral, err := PvIntegral(integrand, omegaMin, omegaMax, omega, env.ReGc0dw, env.ReGc0Points)
 	if err != nil {
