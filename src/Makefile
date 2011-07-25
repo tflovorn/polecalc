@@ -7,6 +7,7 @@ bracket.go\
 cubicspline.go\
 environment.go\
 integrate.go\
+kramerskronig.go\
 list_cache.go\
 mesh2d.go\
 mesh_aggregates.go\
