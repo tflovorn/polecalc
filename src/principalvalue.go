@@ -4,6 +4,7 @@
 // http://stackoverflow.com/questions/6125683/call-go-functions-from-c/6147097#6147097
 package polecalc
 
+// #cgo LDFLAGS: -lgsl
 // #include <stdlib.h>
 // #include <gsl/gsl_integration.h>
 // extern double goEvaluate(double x, void* params);
@@ -21,10 +22,8 @@ package polecalc
 import "C"
 import "unsafe"
 
-type pvHandler func(x float64) float64
-
 type pvRequest struct {
-	f pvHandler
+	f Func1D
 }
 
 //export goEvaluate

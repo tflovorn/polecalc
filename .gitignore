@@ -8,3 +8,4 @@ commit
 *.png
 *.eps
 *.testignore*
+*_cgo*
