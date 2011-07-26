@@ -9,3 +9,4 @@ commit
 *.eps
 *.testignore*
 *_cgo*
+*.o

@@ -7,14 +7,14 @@ package polecalc
 // #cgo LDFLAGS: -lgsl
 // #include <stdlib.h>
 // #include <gsl/gsl_integration.h>
-// extern double goEvaluate(double x, void* params);
+// extern double goEvaluate(double, void*);
 //
 // static double goPvIntegral(double a, double b, double c, double epsabs, double epsrel, size_t limit, void* userdata) {
 // 	gsl_integration_workspace *w = gsl_integration_workspace_alloc(limit);
 //	double result, error;
 //	gsl_function F;
 //	F.function = &goEvaluate;
-//	F.params = &userdata;
+//	F.params = userdata;
 //	gsl_integration_qawc(&F, a, b, c, epsabs, epsrel, limit, w, &result, &error);
 //	gsl_integration_workspace_free(w);
 //	return result;
@@ -22,17 +22,16 @@ package polecalc
 import "C"
 import "unsafe"
 
-type pvRequest struct {
-	f Func1D
-}
-
 //export goEvaluate
 func goEvaluate(x C.double, userdata unsafe.Pointer) C.double {
-	req := (*pvRequest)(userdata)
-	return C.double(req.f(float64(x)))
+	req := (*Func1D)(userdata)
+	f := *req
+	xfloat := float64(x)
+	val := f(xfloat)
+	return C.double(val)
 }
 
 func PvIntegralGSL(f Func1D, a, b, c, epsabs, epsrel float64, limit uint16) float64 {
-	req := unsafe.Pointer(&pvRequest{f})
+	req := unsafe.Pointer(&f)
 	return float64(C.goPvIntegral(C.double(a), C.double(b), C.double(c), C.double(epsabs), C.double(epsrel), C.size_t(limit), req))
 }
