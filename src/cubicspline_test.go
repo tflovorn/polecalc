@@ -24,7 +24,10 @@ func TestCubicSpline3Points(t *testing.T) {
 		t.Fatal(err)
 	}
 	x := 1.0
-	y := spline.At(x)
+	y, err := spline.At(x)
+	if err != nil {
+		t.Fatal(err)
+	}
 	// expect spline coefficients as follows:
 	// a = [0.05 -0.5], b = [0 1.5], c = [86 101], d = [-909 1]
 	yKnown := 103.45
@@ -58,7 +61,10 @@ func TestCubicSplineManyPoints(t *testing.T) {
 			continue
 		}
 		x := xi + step/2
-		y := spline.At(x)
+		y, err := spline.At(x)
+		if err != nil {
+			t.Fatal(err)
+		}
 		yKnown := someCubic(x)
 		if math.Fabs((y-yKnown)/yKnown) > accuracy {
 			t.Fatalf("failed to interpolate to expected accuracy (at %f got %f, expected %f)", x, y, yKnown)
