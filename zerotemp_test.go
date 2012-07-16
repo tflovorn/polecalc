@@ -11,7 +11,7 @@ import (
 var cached *bool = flag.Bool("gc_cache", false, "used cached Environment for TestGc0")
 
 func TestKnownZeroTempSystem(t *testing.T) {
-	envStr := "{\"GridLength\":8,\"InitD1\":0.1,\"InitMu\":0.1,\"InitF0\":0.1,\"Alpha\":-1,\"T0\":1,\"Tz\":0.1,\"Thp\":0.1,\"X\":0.1,\"D1\":0.05777149373506872,\"Mu\":-0.18330570279347036,\"F0\":0.12945949461029926,\"EpsilonMin\":-1.8}"
+	envStr := "{\"GridLength\":8,\"ImGc0Bins\":0,\"ReGc0Points\":0,\"ReGc0dw\":0,\"InitD1\":0.1,\"InitMu\":0.1,\"InitF0\":0.1,\"Alpha\":-1,\"T\":0,\"T0\":1,\"Tz\":0.1,\"Thp\":0.1,\"X\":0.1,\"DeltaS\":0,\"CS\":0,\"Superconducting\":false,\"D1\":0.05777149373506878,\"Mu\":-0.18330570279347042,\"F0\":0.12945949461029932,\"EpsilonMin\":-1.8}"
 	expectedEnv, err := EnvironmentFromString(envStr)
 	if err != nil {
 		t.Fatal(err)

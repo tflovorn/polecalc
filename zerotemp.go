@@ -1,9 +1,6 @@
 package polecalc
 
-import (
-	"math"
-	"os"
-)
+import "math"
 
 // Returns the system of equations needed to solve the system at T = 0
 func NewZeroTempSystem(tolerances []float64) *SelfConsistentSystem {
@@ -41,7 +38,7 @@ func (eq ZeroTempD1Equation) SetArguments(D1 float64, args interface{}) interfac
 	return env
 }
 
-func (eq ZeroTempD1Equation) Range(args interface{}) (float64, float64, os.Error) {
+func (eq ZeroTempD1Equation) Range(args interface{}) (float64, float64, error) {
 	return 0.0, 1.0, nil
 }
 
@@ -70,7 +67,7 @@ func (eq ZeroTempMuEquation) SetArguments(Mu float64, args interface{}) interfac
 
 // mu < 0 is enforced since for mu >= 0 terms with 1 / PairEnergy() can blow up
 // Factor of -2 is arbitrary, may need to be enlarged for some Environments
-func (eq ZeroTempMuEquation) Range(args interface{}) (float64, float64, os.Error) {
+func (eq ZeroTempMuEquation) Range(args interface{}) (float64, float64, error) {
 	env := args.(Environment)
 	return -2 * env.T0, -MachEpsFloat64(), nil
 }
@@ -99,7 +96,7 @@ func (eq ZeroTempF0Equation) SetArguments(F0 float64, args interface{}) interfac
 	return env
 }
 
-func (eq ZeroTempF0Equation) Range(args interface{}) (float64, float64, os.Error) {
+func (eq ZeroTempF0Equation) Range(args interface{}) (float64, float64, error) {
 	return 0.0, 1.0, nil
 }
 
@@ -140,7 +137,7 @@ func ZeroTempFermi(energy float64) float64 {
 // Find the minimium value of omega for which ImGc0 > 0.
 func ZeroTempGap(env Environment, k Vector2) float64 {
 	minWorker := func(q Vector2) float64 {
-		return math.Fabs(ZeroTempOmega(env, q) - ZeroTempPairEnergy(env, q.Sub(k)))
+		return math.Abs(ZeroTempOmega(env, q) - ZeroTempPairEnergy(env, q.Sub(k)))
 	}
 	gap := Minimum(env.GridLength, minWorker)
 	return gap

@@ -1,8 +1,8 @@
 package polecalc
 
 import (
-	"testing"
 	"math"
+	"testing"
 )
 
 // Average of Sin(kx) * Sin(ky) over Brillouin zone should be 0.
@@ -34,7 +34,7 @@ func TestTwoDeltas(t *testing.T) {
 	expected := 1.0
 	for _, point := range deltaPoints {
 		index := binner.BinVarToIndex(point)
-		if math.Fabs(result[index]-expected) > MachEpsFloat64() {
+		if math.Abs(result[index]-expected) > MachEpsFloat64() {
 			t.Fatalf("incorrect delta sum (%f)", result[index])
 		}
 	}

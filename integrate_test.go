@@ -1,8 +1,8 @@
 package polecalc
 
 import (
-	"testing"
 	"math"
+	"testing"
 )
 
 // Does the cubic spline integral produce the expected result when 
@@ -28,7 +28,7 @@ func TestCubicSplineIntegral3Points(t *testing.T) {
 	valKnown := -3747.025
 	// 1e-15 is somewhat arbitrary
 	// (couldn't get results to match to better accuracy)
-	if math.Fabs((val-valKnown)/valKnown) > 1e-15 {
+	if math.Abs((val-valKnown)/valKnown) > 1e-15 {
 		t.Fatalf("failed to reproduce integral (got %f, expected %f)", val, valKnown)
 	}
 }
@@ -36,8 +36,8 @@ func TestCubicSplineIntegral3Points(t *testing.T) {
 // Does the principal value integral return the correct result for a removable
 // singularity?  (simulate this singularity by integrating a constant)
 func TestPrincipalValueRemovable(t *testing.T) {
-	constant := func(x float64) float64 {
-		return 1.0
+	constant := func(x float64) (float64, error) {
+		return 1.0, nil
 	}
 	eps := 1e-9
 	a, b := 0.0, 5.0
@@ -48,7 +48,7 @@ func TestPrincipalValueRemovable(t *testing.T) {
 	}
 	expected := b - a
 	tolerance := 1e-6
-	if math.Fabs(integral-expected) > tolerance {
+	if math.Abs(integral-expected) > tolerance {
 		t.Fatalf("pv integral gave incorrect value (got %f, expected %f)", integral, expected)
 	}
 }

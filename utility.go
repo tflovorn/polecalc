@@ -1,18 +1,18 @@
 package polecalc
 
 import (
-	"json"
-	"os"
+	"encoding/json"
 	"math"
+	"os"
 	"strings"
 )
 
 // One-dimensional scalar function - used for bisection and bracket
 type Func1D func(float64) float64
-type Func1DError func(float64) (float64, os.Error)
+type Func1DError func(float64) (float64, error)
 
 // Write Marshal-able object to a new file at filePath
-func WriteToJSONFile(object interface{}, filePath string) os.Error {
+func WriteToJSONFile(object interface{}, filePath string) error {
 	marshalled, err := json.Marshal(object)
 	if err != nil {
 		return err
@@ -37,16 +37,16 @@ func MachEpsFloat64() float64 {
 
 // Are x and y within MachEpsFloat64() of one another?
 func FuzzyEqual(x, y float64) bool {
-	return math.Fabs(x-y) < MachEpsFloat64()
+	return math.Abs(x-y) < MachEpsFloat64()
 }
 
 // Are x and y within a smallish multiple of MachEpsFloat64() of one another?
 func FuzzierEqual(x, y float64) bool {
-	return math.Fabs(x-y) < (MachEpsFloat64() * 64)
+	return math.Abs(x-y) < (MachEpsFloat64() * 64)
 }
 
 // Convert string to byte slice
-func StringToBytes(str string) ([]byte, os.Error) {
+func StringToBytes(str string) ([]byte, error) {
 	reader := strings.NewReader(str)
 	bytes := make([]byte, len(str))
 	for seen := 0; seen < len(str); {

@@ -1,17 +1,17 @@
 package polecalc
 
 import (
+	"errors"
 	"math"
-	"os"
 )
 
 // Find the root of f in the interval (left, right) to precision epsilon using the bisection method
-func SolveBisection(f Func1D, left, right, epsilon float64) (float64, os.Error) {
+func SolveBisection(f Func1D, left, right, epsilon float64) (float64, error) {
 	if left > right {
 		left, right = right, left
 	}
-	var error os.Error
-	for math.Fabs(right-left) > 2*epsilon {
+	var error error
+	for math.Abs(right-left) > 2*epsilon {
 		left, right, error = BisectionIterate(f, left, right)
 		if error != nil {
 			return (left + right) / 2.0, error
@@ -21,9 +21,9 @@ func SolveBisection(f Func1D, left, right, epsilon float64) (float64, os.Error) 
 }
 
 // Provide the next iteration of the bisection method for f on the interval (left, right)
-func BisectionIterate(f Func1D, left, right float64) (float64, float64, os.Error) {
+func BisectionIterate(f Func1D, left, right float64) (float64, float64, error) {
 	if f(left)*f(right) > 0 {
-		return left, right, os.NewError("arguments do not bracket a root")
+		return left, right, errors.New("arguments do not bracket a root")
 	}
 	midpoint := (left + right) / 2.0
 	fl, fm, fr := f(left), f(midpoint), f(right)
@@ -46,11 +46,11 @@ func BisectionIterate(f Func1D, left, right float64) (float64, float64, os.Error
 
 // Solve f for the root in interval (a, b) up to machine precision using bisection
 // Cribbed from implementation on Wikipedia page 'Bisection method'
-func BisectionFullPrecision(f Func1D, a, b float64) (float64, os.Error) {
+func BisectionFullPrecision(f Func1D, a, b float64) (float64, error) {
 	fa, fb := f(a), f(b)
 	if !((fa >= 0 && fb <= 0) || (fa <= 0 && fb >= 0)) {
 		// no root bracketed
-		return 0, os.NewError("arguments do not bracket a root")
+		return 0, errors.New("arguments do not bracket a root")
 	}
 	var lo, hi float64
 	if fa <= 0 {

@@ -160,7 +160,7 @@ func (binner DeltaBinner) result() interface{} {
 }
 
 func (binner DeltaBinner) Step() float64 {
-	return math.Fabs(binner.binStop-binner.binStart) / float64(binner.numBins)
+	return math.Abs(binner.binStop-binner.binStart) / float64(binner.numBins)
 }
 
 func (binner DeltaBinner) BinVarToIndex(binVar float64) int {

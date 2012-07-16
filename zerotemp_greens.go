@@ -3,7 +3,6 @@ package polecalc
 import (
 	"fmt"
 	"math"
-	"os"
 )
 
 var imGc0Cache = NewListCache()
@@ -88,12 +87,12 @@ func addToCacheImGc0(env Environment, k Vector2, spl *CubicSpline) {
 	}
 }
 
-func getFromCacheImGc0(env Environment, k Vector2) (*CubicSpline, os.Error) {
+func getFromCacheImGc0(env Environment, k Vector2) (*CubicSpline, error) {
 	var imPart *CubicSpline
 	if cache, ok := cachedImGc0(env, k); ok {
 		imPart = cache
 	} else {
-		var err os.Error
+		var err error
 		imPartOmegaVals, imPartFuncVals := ZeroTempImGc0(env, k)
 		imPart, err = NewCubicSpline(imPartOmegaVals, imPartFuncVals)
 		if err != nil {
@@ -106,7 +105,7 @@ func getFromCacheImGc0(env Environment, k Vector2) (*CubicSpline, os.Error) {
 
 // implementing this the lazy way for now by interpolating ImGc0(k)
 // could also calculate ImGc0(k,omega) directly
-func ZeroTempImGc0Point(env Environment, k Vector2, omega float64) (float64, os.Error) {
+func ZeroTempImGc0Point(env Environment, k Vector2, omega float64) (float64, error) {
 	imPart, err := getFromCacheImGc0(env, k)
 	if err != nil {
 		return 0.0, err
@@ -119,7 +118,7 @@ func ZeroTempImGc0Point(env Environment, k Vector2, omega float64) (float64, os.
 }
 
 // -- real part of noninteracting Green's function --
-func ZeroTempReGc0(env Environment, k Vector2, omega float64) (float64, os.Error) {
+func ZeroTempReGc0(env Environment, k Vector2, omega float64) (float64, error) {
 	imPart, err := getFromCacheImGc0(env, k)
 	if err != nil {
 		return 0.0, err
@@ -127,7 +126,7 @@ func ZeroTempReGc0(env Environment, k Vector2, omega float64) (float64, os.Error
 	omegaMin, omegaMax := imPart.Range()
 	// assume that Im(Gc0) is smooth near omegaPrime, so that spline
 	// interpolation is good enough
-	integrand := func(omegaPrime float64) (float64, os.Error) {
+	integrand := func(omegaPrime float64) (float64, error) {
 		if omegaMin <= omega && omega <= omegaMax {
 			im, err := imPart.At(omegaPrime)
 			if err != nil {
@@ -162,7 +161,7 @@ func (eq ZeroTempGreenPoleEq) AbsError(args interface{}) float64 {
 	env, omega := greenArgs.Env, greenArgs.Omega
 	ReGc0, err := ZeroTempReGc0(env, eq.K, omega)
 	if err != nil {
-		panic("error encountered searching for ReGc0: " + err.String())
+		panic("error encountered searching for ReGc0: " + err.Error())
 	}
 	/*
 		ImGc0, err := ZeroTempImGc0Point(env, eq.K, omega)
@@ -180,13 +179,13 @@ func (eq ZeroTempGreenPoleEq) SetArguments(omega float64, args interface{}) inte
 	return ZeroTempGreenArgs{env, omega}
 }
 
-func (eq ZeroTempGreenPoleEq) Range(args interface{}) (float64, float64, os.Error) {
+func (eq ZeroTempGreenPoleEq) Range(args interface{}) (float64, float64, error) {
 	env := args.(ZeroTempGreenArgs).Env
 	return -10.0 * env.T, 10.0 * env.T, nil
 }
 
 // return all pole omegas at a given k
-func ZeroTempGreenPolePoint(env Environment, k Vector2) ([]float64, os.Error) {
+func ZeroTempGreenPolePoint(env Environment, k Vector2) ([]float64, error) {
 	// find brackets for all the poles
 	// lazy for now - only look at one solution
 	eq := ZeroTempGreenPoleEq{k}
@@ -204,7 +203,7 @@ func ZeroTempGreenPolePoint(env Environment, k Vector2) ([]float64, os.Error) {
 }
 
 // real part of the full Green's function
-func FullReGc(env Environment, k Vector2, omega float64) (float64, os.Error) {
+func FullReGc(env Environment, k Vector2, omega float64) (float64, error) {
 	ReGc0, err := ZeroTempReGc0(env, k, omega)
 	if err != nil {
 		return 0.0, err
@@ -231,10 +230,10 @@ func (gp GreenPole) String() string {
 	return fmt.Sprintf("k: %v; omega: %f", gp.K, gp.Omega)
 }
 
-func capturePoles(env Environment, k Vector2, poles []GreenPole) ([]GreenPole, os.Error) {
+func capturePoles(env Environment, k Vector2, poles []GreenPole) ([]GreenPole, error) {
 	kPoles, err := ZeroTempGreenPolePoint(env, k)
 	if err != nil {
-		if err.String() == ErrorNoBracket {
+		if err.Error() == ErrorNoBracket {
 			println("bracket error at k = ", k.String())
 			return poles, nil
 		}
@@ -249,10 +248,10 @@ func capturePoles(env Environment, k Vector2, poles []GreenPole) ([]GreenPole, o
 }
 
 // scan the k space looking for poles; return all those found
-func ZeroTempGreenPolePlane(env Environment, pointsPerSide uint32, minimal bool) ([]GreenPole, os.Error) {
+func ZeroTempGreenPolePlane(env Environment, pointsPerSide uint32, minimal bool) ([]GreenPole, error) {
 	poles := []GreenPole{}
-	callback := func(k Vector2) os.Error {
-		var err os.Error
+	callback := func(k Vector2) error {
+		var err error
 		poles, err = capturePoles(env, k, poles)
 		return err
 	}
@@ -262,10 +261,10 @@ func ZeroTempGreenPolePlane(env Environment, pointsPerSide uint32, minimal bool)
 
 // Scan k values given along poleCurve, which takes a value from 0 to 1 and 
 // returns a vector in k space.  Return all poles found.
-func ZeroTempGreenPoleCurve(env Environment, poleCurve CurveGenerator, numPoints uint) ([]GreenPole, os.Error) {
+func ZeroTempGreenPoleCurve(env Environment, poleCurve CurveGenerator, numPoints uint) ([]GreenPole, error) {
 	poles := []GreenPole{}
-	callback := func(k Vector2) os.Error {
-		var err os.Error
+	callback := func(k Vector2) error {
+		var err error
 		poles, err = capturePoles(env, k, poles)
 		return err
 	}

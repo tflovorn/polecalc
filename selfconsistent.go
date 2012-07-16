@@ -1,9 +1,6 @@
 package polecalc
 
-import (
-	"os"
-	"math"
-)
+import "math"
 
 // One-parameter scalar self-consistent equation
 type SelfConsistentEquation interface {
@@ -12,11 +9,11 @@ type SelfConsistentEquation interface {
 	// set the appropriate variable in args to value
 	SetArguments(value float64, args interface{}) interface{}
 	// range of possible values for SetArguments
-	Range(args interface{}) (float64, float64, os.Error)
+	Range(args interface{}) (float64, float64, error)
 }
 
 // Return an interface{} which solves eq to tolerance of BisectionFullPrecision
-func Solve(eq SelfConsistentEquation, args interface{}) (interface{}, os.Error) {
+func Solve(eq SelfConsistentEquation, args interface{}) (interface{}, error) {
 	eqError := func(value float64) float64 {
 		args = eq.SetArguments(value, args)
 		return eq.AbsError(args)
@@ -38,7 +35,7 @@ func Solve(eq SelfConsistentEquation, args interface{}) (interface{}, os.Error) 
 }
 
 // Return a slice of interface{}'s which solve eq
-func MultiSolve(eq SelfConsistentEquation, args interface{}) ([]interface{}, os.Error) {
+func MultiSolve(eq SelfConsistentEquation, args interface{}) ([]interface{}, error) {
 	eqError := func(value float64) float64 {
 		args = eq.SetArguments(value, args)
 		return eq.AbsError(args)
@@ -71,7 +68,7 @@ type SelfConsistentSystem struct {
 }
 
 // Solve the self-consistent system, returning the resulting interface{}
-func (system *SelfConsistentSystem) Solve(args interface{}) (interface{}, os.Error) {
+func (system *SelfConsistentSystem) Solve(args interface{}) (interface{}, error) {
 	i := 0
 	for !system.IsSolved(args) {
 		// this should never be true: if it is, failed to iterate
@@ -102,7 +99,7 @@ func (system *SelfConsistentSystem) solvedUpTo(args interface{}, maxIndex int) b
 		if i > maxIndex {
 			break
 		}
-		if math.Fabs(eq.AbsError(args)) > system.Tolerances[i] {
+		if math.Abs(eq.AbsError(args)) > system.Tolerances[i] {
 			return false
 		}
 	}

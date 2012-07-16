@@ -1,8 +1,8 @@
 package polecalc
 
 import (
-	"testing"
 	"math"
+	"testing"
 )
 
 // Simple 3x3 case for tridiagonal matrix equation
@@ -18,7 +18,7 @@ func TestTridiagonal3(t *testing.T) {
 	x := TridiagonalSolve(a, b, c, d)
 	expected := []float64{3.0 / 14.0, 1.0 / 7.0, 3.0 / 14.0}
 	for i, val := range expected {
-		if math.Fabs(val-x[i]) > MachEpsFloat64() {
+		if math.Abs(val-x[i]) > MachEpsFloat64() {
 			t.Fatalf("tridiagonal solution failed: got (%v), expected (%v)", x, expected)
 		}
 	}

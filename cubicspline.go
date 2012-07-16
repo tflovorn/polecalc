@@ -4,7 +4,7 @@
 package polecalc
 
 import (
-	"os"
+	"errors"
 	"math"
 )
 
@@ -21,18 +21,18 @@ type CubicSpline struct {
 // Return a pointer to a cubic spline interpolating y = f(x).
 // xs is an ordered slice of equally spaced x values.
 // ys is a slice of the corresponding y values.
-func NewCubicSpline(xs, ys []float64) (*CubicSpline, os.Error) {
+func NewCubicSpline(xs, ys []float64) (*CubicSpline, error) {
 	// xs and ys must have the same length
 	if len(xs) != len(ys) {
-		return nil, os.NewError("input slices must be the same length")
+		return nil, errors.New("input slices must be the same length")
 	}
 	// must have at least three points
 	if len(xs) < 3 {
-		return nil, os.NewError("not enough points for cubic spline")
+		return nil, errors.New("not enough points for cubic spline")
 	}
 	// xs must be ordered
 	if !inAscendingOrder(xs) {
-		return nil, os.NewError("xs must be in ascending order")
+		return nil, errors.New("xs must be in ascending order")
 	}
 	spline := new(CubicSpline)
 	spline.xs = xs
@@ -42,11 +42,11 @@ func NewCubicSpline(xs, ys []float64) (*CubicSpline, os.Error) {
 
 // Value of the interpolated function S(x) at x
 // Will panic if x is outside the interpolation range
-func (s *CubicSpline) At(x float64) (float64, os.Error) {
+func (s *CubicSpline) At(x float64) (float64, error) {
 	xMin, xMax := s.Range()
 	eps := SplineExtrapolationDistance
 	if (xMin-x > eps) || (x-xMax > eps) {
-		return 0.0, os.NewError("accessing cubic spline out of bounds")
+		return 0.0, errors.New("accessing cubic spline out of bounds")
 	}
 	i := s.indexOf(x)
 	return s.splineAt(i, x), nil

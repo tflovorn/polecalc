@@ -1,9 +1,6 @@
 package polecalc
 
-import (
-	"math"
-	"os"
-)
+import "math"
 
 // Return coordinate from the square mesh of lenght L corresponding to the 
 // index i.
@@ -28,10 +25,10 @@ func SquareAt(i uint64, L uint32) Vector2 {
 	return Vector2{x, y}
 }
 
-type Callback func(k Vector2) os.Error
+type Callback func(k Vector2) error
 type Acceptor func(k Vector2) bool
 
-func CallOnAccepted(L uint32, callback Callback, acceptor Acceptor) os.Error {
+func CallOnAccepted(L uint32, callback Callback, acceptor Acceptor) error {
 	sqrtN := uint64(L)
 	N := sqrtN * sqrtN
 	for i := uint64(0); i < N; i++ {
@@ -47,7 +44,7 @@ func CallOnAccepted(L uint32, callback Callback, acceptor Acceptor) os.Error {
 }
 
 // call callback on all points in the square mesh of length L
-func CallOnPlane(L uint32, callback Callback) os.Error {
+func CallOnPlane(L uint32, callback Callback) error {
 	acceptor := func(k Vector2) bool {
 		return true
 	}
@@ -55,7 +52,7 @@ func CallOnPlane(L uint32, callback Callback) os.Error {
 }
 
 // call callback on the third quadrant only
-func CallOnThirdQuad(L uint32, callback Callback) os.Error {
+func CallOnThirdQuad(L uint32, callback Callback) error {
 	acceptor := func(k Vector2) bool {
 		return k.X <= 0 && k.Y <= 0
 	}
@@ -65,7 +62,7 @@ func CallOnThirdQuad(L uint32, callback Callback) os.Error {
 // call callback on the given curve
 type CurveGenerator func(float64) Vector2
 
-func CallOnCurve(curve CurveGenerator, numPoints uint, callback Callback) os.Error {
+func CallOnCurve(curve CurveGenerator, numPoints uint, callback Callback) error {
 	xValues := MakeRange(0.0, 1.0, numPoints)
 	for _, x := range xValues {
 		k := curve(x)
@@ -79,7 +76,7 @@ func CallOnCurve(curve CurveGenerator, numPoints uint, callback Callback) os.Err
 
 // Scan k values along lines of high symmetry. Call callback at each point.
 // k values form a cycle: (0, 0) -> (pi, 0) -> (pi, pi) -> (0, 0)
-func CallOnSymmetryLines(numPoints uint, callback Callback) os.Error {
+func CallOnSymmetryLines(numPoints uint, callback Callback) error {
 	xAxis := func(x float64) Vector2 {
 		return Vector2{x * math.Pi, 0.0}
 	}

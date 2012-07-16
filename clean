@@ -1,5 +1,3 @@
 #!/bin/bash
 
-cd src
-gomake clean
 rm *.testignore*

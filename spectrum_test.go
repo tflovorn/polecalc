@@ -1,8 +1,8 @@
 package polecalc
 
 import (
-	"testing"
 	"math"
+	"testing"
 )
 
 // Is EpsilonMin set such that the minimum of Epsilon is 0?
@@ -16,7 +16,7 @@ func TestEpsilonMin(t *testing.T) {
 		return Epsilon(*env, k)
 	}
 	min := Minimum(env.GridLength, worker)
-	if math.Fabs(min) > MachEpsFloat64() {
+	if math.Abs(min) > MachEpsFloat64() {
 		t.Fatalf("minimum of Epsilon too large (%f)", min)
 	}
 }

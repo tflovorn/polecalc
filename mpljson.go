@@ -1,9 +1,9 @@
 package polecalc
 
 import (
-	"json"
+	"encoding/json"
 	"os"
-	"exec"
+	"os/exec"
 )
 
 const SERIES_KEY = "series"
@@ -41,7 +41,7 @@ func (graph *Graph) AddSeries(params map[string]string, data [][]float64) {
 }
 
 // Implements interface json.Marshaler
-func (graph *Graph) MarshalJSON() ([]byte, os.Error) {
+func (graph *Graph) MarshalJSON() ([]byte, error) {
 	jsonGraph := jsonObject{}
 	// add global graph parameters
 	for key, value := range graph.graphParameters {
@@ -64,7 +64,7 @@ func (graph *Graph) MarshalJSON() ([]byte, os.Error) {
 // Constructs a plot from graph_data using matplotlib.
 // graph_data must be a list or dictionary containing objects representable
 // in JSON.  Blocks until Python script is finished.
-func MakePlot(graphData interface{}, jsonFilePath string) os.Error {
+func MakePlot(graphData interface{}, jsonFilePath string) error {
 	if err := WriteToJSONFile(graphData, jsonFilePath); err != nil {
 		return err
 	}

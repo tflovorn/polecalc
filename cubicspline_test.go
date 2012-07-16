@@ -1,9 +1,9 @@
 package polecalc
 
 import (
-	"testing"
-	"math"
 	"fmt"
+	"math"
+	"testing"
 )
 
 // Does the cubic spline produce the expected result when interpolating over
@@ -31,7 +31,7 @@ func TestCubicSpline3Points(t *testing.T) {
 	// expect spline coefficients as follows:
 	// a = [0.05 -0.5], b = [0 1.5], c = [86 101], d = [-909 1]
 	yKnown := 103.45
-	if math.Fabs(y-yKnown) > MachEpsFloat64() {
+	if math.Abs(y-yKnown) > MachEpsFloat64() {
 		fmt.Printf("a:%v b:%v c:%v d:%v\n", spline.a, spline.b, spline.c, spline.d)
 		fmt.Printf("xs = %v; ys = %v\n", xs, ys)
 		t.Fatalf("failed to reproduce interpolation at known value (at %f got %f, expected %f)", x, y, yKnown)
@@ -66,7 +66,7 @@ func TestCubicSplineManyPoints(t *testing.T) {
 			t.Fatal(err)
 		}
 		yKnown := someCubic(x)
-		if math.Fabs((y-yKnown)/yKnown) > accuracy {
+		if math.Abs((y-yKnown)/yKnown) > accuracy {
 			t.Fatalf("failed to interpolate to expected accuracy (at %f got %f, expected %f)", x, y, yKnown)
 		}
 	}

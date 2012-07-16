@@ -1,13 +1,11 @@
 package polecalc
 
 import (
-	"os"
-	"math"
 	"fmt"
+	"math"
 )
 
-
-func ZeroTempPlotGc(env Environment, k Vector2, numOmega uint, outputPath string) os.Error {
+func ZeroTempPlotGc(env Environment, k Vector2, numOmega uint, outputPath string) error {
 	imOmegas, imCalcValues := ZeroTempImGc0(env, k)
 	imSpline, err := NewCubicSpline(imOmegas, imCalcValues)
 	if err != nil {
@@ -79,8 +77,8 @@ func ZeroTempPlotGc(env Environment, k Vector2, numOmega uint, outputPath string
 }
 
 // Plot im/re gc0 and re gc along lines of high symmetry in k space.
-func PlotGcSymmetryLines(env Environment, kPoints, numOmega uint, outputPath string) os.Error {
-	callback := func(k Vector2) os.Error {
+func PlotGcSymmetryLines(env Environment, kPoints, numOmega uint, outputPath string) error {
+	callback := func(k Vector2) error {
 		extra := fmt.Sprintf("_kx_%f_ky_%f", k.X, k.Y)
 		fullPath := outputPath + extra
 		err := ZeroTempPlotGc(env, k, numOmega, fullPath)
@@ -91,7 +89,7 @@ func PlotGcSymmetryLines(env Environment, kPoints, numOmega uint, outputPath str
 }
 
 // Plot the existence of poles throughout the k plane.
-func ZeroTempPlotPolePlane(env Environment, outputPath string, sideLength uint32) os.Error {
+func ZeroTempPlotPolePlane(env Environment, outputPath string, sideLength uint32) error {
 	polePlane, err := ZeroTempGreenPolePlane(env, sideLength, true)
 	if err != nil {
 		return err
@@ -100,10 +98,9 @@ func ZeroTempPlotPolePlane(env Environment, outputPath string, sideLength uint32
 	return nil
 }
 
-
 // Plot the line of poles specified by poleCurve, which takes a float value from
 // 0 to 1 and returns a Vector2 corresponding to that value
-func ZeroTempPlotPoleCurve(env Environment, poleCurve func(float64) Vector2, numPoints uint, outputPath string) os.Error {
+func ZeroTempPlotPoleCurve(env Environment, poleCurve func(float64) Vector2, numPoints uint, outputPath string) error {
 	polePoints, err := ZeroTempGreenPoleCurve(env, poleCurve, numPoints)
 	if err != nil {
 		return err

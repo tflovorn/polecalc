@@ -1,8 +1,8 @@
 package polecalc
 
 import (
-	"testing"
 	"math"
+	"testing"
 )
 
 func TestPrincipalValueGSLConstant(t *testing.T) {
@@ -15,8 +15,8 @@ func TestPrincipalValueGSLConstant(t *testing.T) {
 	a, b := 0.0, 5.0
 	c := (a + b) / 2.0
 	integral := PvIntegralGSL(constant, a, b, c, epsabs, epsrel, limit)
-	expected := math.Log(math.Fabs((b - c) / (a - c)))
-	if math.Fabs(integral-expected) > epsabs {
+	expected := math.Log(math.Abs((b - c) / (a - c)))
+	if math.Abs(integral-expected) > epsabs {
 		t.Fatalf("tolerance exceeded")
 	}
 }

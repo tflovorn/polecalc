@@ -1,7 +1,7 @@
 package polecalc
 
 import (
-	"os"
+	"errors"
 	"fmt"
 )
 
@@ -9,7 +9,7 @@ import (
 // xs is an ordered slice of equally spaced x values.
 // ys is a slice of the corresponding y values.
 // Assume left >= xs[0] and right <= xs[len(xs)-1].
-func SplineIntegral(xs, ys []float64, left, right float64) (float64, os.Error) {
+func SplineIntegral(xs, ys []float64, left, right float64) (float64, error) {
 	// if the arguments are reversed, we need a minus sign later
 	sign := 1.0
 	if left > right {
@@ -25,7 +25,7 @@ func SplineIntegral(xs, ys []float64, left, right float64) (float64, os.Error) {
 	// can't integrate if left or right is outside of interpolation range
 	eps := SplineExtrapolationDistance
 	if (xMin-left > eps) || (right-xMax > eps) {
-		return 0.0, os.NewError("SplineIntegral error: integral arguments out of bounds")
+		return 0.0, errors.New("SplineIntegral error: integral arguments out of bounds")
 	}
 	// k and q are the first and last indices for integration
 	k, q := s.indexOf(left), s.indexOf(right)
@@ -44,7 +44,7 @@ func SplineIntegral(xs, ys []float64, left, right float64) (float64, os.Error) {
 // pole at x = w and do cubic spline integrals in the appropriate spots, 
 // staying a distance eps away from the pole.  Use n points for the cubic
 // spline on each side of the pole.
-func PvIntegral(f Func1DError, a, b, w, eps float64, n uint) (float64, os.Error) {
+func PvIntegral(f Func1DError, a, b, w, eps float64, n uint) (float64, error) {
 	// can't integrate if a boundary is on top of the pole
 	if a == w || b == w {
 		return 0.0, fmt.Errorf("PvIntegral error: pole (%f) equals a boundary (%f, %f)", w, a, b)
@@ -88,7 +88,7 @@ func PvIntegral(f Func1DError, a, b, w, eps float64, n uint) (float64, os.Error)
 		if wl < a || FuzzyEqual(w-a, 0.0) {
 			leftInt = 0.0
 		} else {
-			var err os.Error
+			var err error
 			leftInt, err = SplineIntegral(xls, yls, a, wl)
 			if err != nil {
 				return 0.0, err
@@ -97,7 +97,7 @@ func PvIntegral(f Func1DError, a, b, w, eps float64, n uint) (float64, os.Error)
 		if wr > b || FuzzyEqual(b-w, 0.0) {
 			rightInt = 0.0
 		} else {
-			var err os.Error
+			var err error
 			rightInt, err = SplineIntegral(xrs, yrs, wr, b)
 			if err != nil {
 				return 0.0, err

@@ -1,13 +1,12 @@
 package polecalc
 
 import (
-	"fmt"
-	"os"
-	"json"
 	"bytes"
+	"encoding/json"
+	"fmt"
 	"io/ioutil"
-	"reflect"
 	"math"
+	"reflect"
 )
 
 // Holds all the necessary data for evaluating functions in the cuprate system
@@ -77,7 +76,7 @@ func (env *Environment) String() string {
 
 // Construct an Environment from the JSON file with given path.
 // Self-consistent parameters are not set to values given by Init fields.
-func EnvironmentFromFile(filePath string) (*Environment, os.Error) {
+func EnvironmentFromFile(filePath string) (*Environment, error) {
 	fileContents, err := ioutil.ReadFile(filePath)
 	if err != nil {
 		return nil, err
@@ -86,7 +85,7 @@ func EnvironmentFromFile(filePath string) (*Environment, os.Error) {
 }
 
 // Convert to string and pass to EnvironmentFromBytes
-func EnvironmentFromString(jsonData string) (*Environment, os.Error) {
+func EnvironmentFromString(jsonData string) (*Environment, error) {
 	jsonBytes, err := StringToBytes(jsonData)
 	if err != nil {
 		return nil, err
@@ -96,7 +95,7 @@ func EnvironmentFromString(jsonData string) (*Environment, os.Error) {
 
 // Construct an Environment from the given JSON byte slice.
 // Self-consistent parameters are not set to values given by Init fields.
-func EnvironmentFromBytes(jsonData []byte) (*Environment, os.Error) {
+func EnvironmentFromBytes(jsonData []byte) (*Environment, error) {
 	jsonObject := make(map[string]interface{})
 	if err := json.Unmarshal(jsonData, &jsonObject); err != nil {
 		return nil, err
@@ -106,7 +105,7 @@ func EnvironmentFromBytes(jsonData []byte) (*Environment, os.Error) {
 
 // Construct an Environment from the given JSON object.
 // Self-consistent parameters are not set to values given by Init fields.
-func EnvironmentFromObject(jsonObject map[string]interface{}) (*Environment, os.Error) {
+func EnvironmentFromObject(jsonObject map[string]interface{}) (*Environment, error) {
 	env := new(Environment)
 	envValue := reflect.Indirect(reflect.ValueOf(env))
 	for key, value := range jsonObject {
@@ -132,7 +131,7 @@ func EnvironmentFromObject(jsonObject map[string]interface{}) (*Environment, os.
 }
 
 // Write the Environment to a JSON file at the given path
-func (env *Environment) WriteToFile(filePath string) os.Error {
+func (env *Environment) WriteToFile(filePath string) error {
 	if err := WriteToJSONFile(env, filePath); err != nil {
 		return err
 	}

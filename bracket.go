@@ -1,22 +1,23 @@
 package polecalc
 
-import "os"
+import "errors"
 
 var ErrorNoBracket string = "cannot find bracket"
 
 // (should probably set these constants through a configuration method)
 // Number of steps to take in the first attempt to find a bracket.
 const InitialBracketNumber uint = 32
+
 // If using more steps than this to find a bracket, stop.
 const MaxBracketNumber uint = 256 // 4 iterations from 32 (32 * 2^4)
 
 // Find all pairs of points which bracket roots of f between left and right.
-func MultiBracket(f Func1D, left, right float64) ([][]float64, os.Error) {
+func MultiBracket(f Func1D, left, right float64) ([][]float64, error) {
 	return bracketHelper(f, left, right, InitialBracketNumber, -1)
 }
 
 // Find a pair of points which bracket a root of f between left and right.
-func FindBracket(f Func1D, left, right float64) (float64, float64, os.Error) {
+func FindBracket(f Func1D, left, right float64) (float64, float64, error) {
 	bracket, err := bracketHelper(f, left, right, InitialBracketNumber, 1)
 	if err != nil {
 		return 0.0, 0.0, err
@@ -27,9 +28,9 @@ func FindBracket(f Func1D, left, right float64) (float64, float64, os.Error) {
 
 // Use a number of divisions equal to bracketNum to find a root.
 // If maxBrackets <= 0, get as many brackets as possible.
-func bracketHelper(f Func1D, left, right float64, bracketNum uint, maxBrackets int) ([][]float64, os.Error) {
+func bracketHelper(f Func1D, left, right float64, bracketNum uint, maxBrackets int) ([][]float64, error) {
 	if left == right {
-		return nil, os.NewError("bracket error: must give two distinct points to find bracket")
+		return nil, errors.New("bracket error: must give two distinct points to find bracket")
 	}
 	if left > right {
 		left, right = right, left
@@ -60,7 +61,7 @@ func bracketHelper(f Func1D, left, right float64, bracketNum uint, maxBrackets i
 	// overshot bounds if without finding bracket if we get here
 	if bracketNum >= MaxBracketNumber {
 		// too many divisions
-		return nil, os.NewError(ErrorNoBracket)
+		return nil, errors.New(ErrorNoBracket)
 	}
 	// not enough brackets - try again with smaller divisions
 	if len(brackets) == 0 {
